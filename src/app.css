@@ -1,0 +1,341 @@
+/* localhost — Crunchyroll clone design system.
+   Type: bundled Inter (variable, latin). Mono for episode/metadata labels. */
+
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("./assets/fonts/inter-latin.woff2") format("woff2");
+}
+
+:root {
+  --bg: #0d0d0d;
+  --bg-raise: #141414;
+  --surface: #1c1c1e;
+  --surface-2: #28282a;
+  --surface-3: #343436;
+  --border: #262628;
+  --text: #ffffff;
+  --text-dim: #b0b0b3;
+  --text-faint: #75757a;
+  --accent: #f47521;
+  --accent-hover: #ff8b3e;
+  --accent-dim: #f4752114;
+  --green: #2ecc71;
+  --radius: 8px;
+  --radius-sm: 6px;
+  --nav-h: 66px;
+  --shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 14px;
+  letter-spacing: -0.006em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+  user-select: none;
+}
+
+#app {
+  height: 100vh;
+}
+
+h1, h2, h3, h4 {
+  margin: 0;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+input,
+select,
+textarea {
+  font-family: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 9px 13px;
+  outline: none;
+  font-size: 13.5px;
+  user-select: text;
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+  background: var(--surface-2);
+}
+
+img {
+  display: block;
+}
+
+::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #3a3a3d;
+  border-radius: 6px;
+  border: 3px solid var(--bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4b4b4f;
+}
+
+/* ---------- CR pill buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 22px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 700;
+  transition: background 0.14s ease, color 0.14s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn.primary {
+  background: var(--accent);
+  color: #1a0d00;
+}
+
+.btn.primary:hover {
+  background: var(--accent-hover);
+}
+
+.btn.secondary {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.btn.secondary:hover {
+  background: var(--surface-3);
+}
+
+.btn.outline {
+  background: transparent;
+  border: 2px solid var(--surface-3);
+  color: var(--text);
+  padding: 8px 20px;
+}
+
+.btn.outline:hover {
+  border-color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---------- filter pills (CR style: dim pill, white on active) ---------- */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.13s ease;
+}
+
+.chip:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+
+.chip.active {
+  background: var(--text);
+  color: #0d0d0d;
+}
+
+/* ---------- page scaffolding ---------- */
+
+.page {
+  padding: 22px 44px 64px;
+  max-width: 1560px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 24px;
+  margin-bottom: 2px;
+}
+
+.page-sub {
+  color: var(--text-faint);
+  margin: 0 0 20px;
+  font-size: 13px;
+}
+
+.section-title {
+  font-size: 20px;
+  margin: 34px 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-title .link {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.section-title .link:hover {
+  color: var(--accent);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 24px 16px;
+}
+
+.spinner {
+  width: 38px;
+  height: 38px;
+  border: 3px solid var(--surface-2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  margin: 70px auto;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* CR-style skeleton shimmer */
+.skeleton {
+  background: linear-gradient(100deg, var(--surface) 40%, var(--surface-2) 50%, var(--surface) 60%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--radius);
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+.error-box {
+  background: #2a1515;
+  border: 1px solid #4a2525;
+  color: #f0a5a5;
+  padding: 14px 18px;
+  border-radius: var(--radius);
+  margin: 22px 0;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  color: var(--text-faint);
+  padding: 80px 20px;
+}
+
+.empty-state .big {
+  font-size: 40px;
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.empty-state p {
+  margin: 4px 0;
+}
+
+.empty-state .hint {
+  font-size: 12.5px;
+}
+
+/* ---------- badges ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  background: var(--surface-2);
+  color: var(--text-dim);
+}
+
+.badge.airing {
+  background: #16321f;
+  color: var(--green);
+}
+
+/* CR format tag: orange corner ribbon on cards */
+.format-tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--accent);
+  color: #1a0d00;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
