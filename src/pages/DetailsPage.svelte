@@ -1027,84 +1027,11 @@
     color: #ffffff;
   }
 
-  .view-toggle-wrap {
-    display: flex;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 2px;
-  }
-
-  .view-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 28px;
-    height: 26px;
-    border-radius: 3px;
-    background: transparent;
-    border: none;
-    color: #8c8c92;
-    cursor: pointer;
-    transition: background 0.12s ease, color 0.12s ease;
-  }
-
-  .view-btn:hover {
-    color: #ffffff;
-  }
-
-  .view-btn.active {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
-  }
-
-  .carousel-arrows {
-    display: flex;
-    gap: 6px;
-  }
-
-  .arrow-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    line-height: 1;
-    cursor: pointer;
-    transition: background 0.14s ease;
-  }
-
-  .arrow-btn:hover {
-    background: rgba(255, 255, 255, 0.16);
-    color: var(--accent);
-  }
-
   /* Compact Episode Grid */
   .episodes-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px 16px;
-  }
-
-  /* Compact Episode Carousel */
-  .episodes-carousel {
-    display: flex;
-    gap: 18px;
-    overflow-x: auto;
-    scroll-behavior: smooth;
-    padding-bottom: 12px;
-    scrollbar-width: thin;
-  }
-
-  .carousel-card {
-    width: 255px;
-    min-width: 255px;
-    flex-shrink: 0;
   }
 
   .ep-card {

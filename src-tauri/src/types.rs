@@ -75,4 +75,8 @@ pub struct PlayableEpisode {
     pub number: i64,
     pub title: String,
     pub url: String,
+    /// "hls" | "file" | "embed"
+    pub kind: String,
+    /// Human label of the server that answered.
+    pub server: String,
 }

@@ -1,6 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { userStore, BUILT_IN_PRESETS, type CustomThemePreset, type AppPreferences } from "../lib/userStore.svelte";
+  import { api } from "../lib/api";
+  import type { ProviderHealth } from "../lib/types";
 
   let activeTab = $state<
     | "account"
@@ -10,6 +12,7 @@
     | "subtitles"
     | "notifications"
     | "keybinds"
+    | "providers"
     | "data"
     | "about"
   >("appearance");
@@ -40,6 +43,48 @@
   // Custom preset creation input
   let newPresetName = $state("");
   let showCreatePreset = $state(false);
+
+  // Providers (LuciAPI) panel state
+  let mirrorsInput = $state("");
+  let mirrorsDirty = $state(false);
+  let health = $state<ProviderHealth[]>([]);
+  let healthLoading = $state(false);
+
+  async function loadProviders() {
+    try {
+      const mirrors = await api.streamMirrors();
+      mirrorsInput = mirrors.join(", ");
+      mirrorsDirty = false;
+    } catch {
+      // settings table may be empty — nothing stored yet
+    }
+    await runHealthCheck();
+  }
+
+  async function saveMirrors() {
+    const list = mirrorsInput
+      .split(",")
+      .map((s) => s.trim())
+      .filter((s) => s.startsWith("http"));
+    try {
+      await api.setStreamMirrors(list);
+      mirrorsDirty = false;
+      showNotice(`Saved ${list.length} stream mirror${list.length === 1 ? "" : "s"}.`);
+    } catch (e) {
+      showNotice(`Failed to save mirrors: ${String(e)}`);
+    }
+  }
+
+  async function runHealthCheck() {
+    healthLoading = true;
+    try {
+      health = await api.providerHealth();
+    } catch {
+      health = [];
+    } finally {
+      healthLoading = false;
+    }
+  }
 
   // Check if any settings have changed from store
   const hasUnsavedChanges = $derived.by(() => {
@@ -222,6 +267,7 @@
     role="dialog"
     aria-label="User Settings"
     tabindex="-1"
+    onkeydown={(e) => e.key === "Escape" && closeSettings()}
   >
     <!-- Left Sidebar -->
     <aside class="discord-sidebar">
@@ -292,6 +338,17 @@
         >
           <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8" /></svg></span>
           <span>Keybinds</span>
+        </button>
+        <button
+          class="nav-tab"
+          class:active={activeTab === "providers"}
+          onclick={() => {
+            activeTab = "providers";
+            if (!health.length && !healthLoading) loadProviders();
+          }}
+        >
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0" /><path d="M1.42 9a16 16 0 0 1 21.16 0" /><path d="M8.53 16.11a6 6 0 0 1 6.95 0" /><circle cx="12" cy="20" r="1" /></svg></span>
+          <span>Providers</span>
         </button>
 
         <div class="nav-separator"></div>
@@ -630,7 +687,7 @@
               <div class="group-title">Accent Color</div>
               <div class="color-picker-grid">
                 {#each [
-                  { label: "Luci Orange", hex: "#a855f7" },
+                  { label: "Luci Orange", hex: "var(--accent)" },
                   { label: "Electric Cyan", hex: "#00d2ff" },
                   { label: "Emerald Jade", hex: "#10b981" },
                   { label: "Neon Violet", hex: "#8b5cf6" },
@@ -864,13 +921,14 @@
               <div class="group-title">Subtitle Styling</div>
               <div class="subtitle-customizer-grid">
                 <div>
-                  <label class="input-label">Subtitle Color</label>
+                  <span class="input-label">Subtitle Color</span>
                   <div class="color-options-row">
                     {#each ["#ffffff", "#ffe600", "#00ffff"] as c}
                       <button
                         class="sub-col-dot"
                         class:active={subtitleColor === c}
                         style="background: {c}"
+                        aria-label="Subtitle color {c}"
                         onclick={() => (subtitleColor = c as any)}
                       ></button>
                     {/each}
@@ -878,7 +936,7 @@
                 </div>
 
                 <div>
-                  <label class="input-label">Subtitle Size</label>
+                  <span class="input-label">Subtitle Size</span>
                   <select bind:value={subtitleSize} class="settings-select">
                     <option value="small">Small (18px)</option>
                     <option value="medium">Medium (24px)</option>
@@ -920,6 +978,58 @@
               <div class="keybind-row"><span class="key-name">Toggle Fullscreen</span><kbd>F</kbd></div>
               <div class="keybind-row"><span class="key-name">Toggle Mute</span><kbd>M</kbd></div>
               <div class="keybind-row"><span class="key-name">Close Modal / Settings</span><kbd>ESC</kbd></div>
+            </div>
+          </div>
+
+        <!-- TAB: PROVIDERS -->
+        {:else if activeTab === "providers"}
+          <div class="tab-pane">
+            <h2 class="pane-title">Providers & Servers</h2>
+            <p class="pane-desc">
+              Luci resolves metadata and streams through its own provider chain with automatic failover. When a provider is down, the next one takes over — no action needed.
+            </p>
+
+            <div class="providers-block">
+              <div class="providers-head-row">
+                <h3 class="providers-subtitle">API Health</h3>
+                <button class="btn secondary sm" onclick={runHealthCheck} disabled={healthLoading}>
+                  {healthLoading ? "Checking…" : "Re-run Check"}
+                </button>
+              </div>
+
+              {#if health.length === 0 && !healthLoading}
+                <p class="providers-empty">No health data yet — run a check.</p>
+              {:else}
+                <div class="health-list">
+                  {#each health as h (h.name)}
+                    <div class="health-row">
+                      <span class="health-dot" class:ok={h.ok} class:down={!h.ok}></span>
+                      <span class="health-name">{h.name}</span>
+                      <span class="health-kind">{h.kind}</span>
+                      <span class="health-latency">{h.ok ? `${h.latencyMs} ms` : h.detail}</span>
+                      <span class="health-state" class:ok={h.ok}>{h.ok ? "ONLINE" : "DOWN"}</span>
+                    </div>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+
+            <div class="providers-block">
+              <h3 class="providers-subtitle">Stream Mirrors</h3>
+              <p class="providers-hint">
+                Optional fallback servers used when ani.zip sources are unreachable. Comma-separated, Consumet-compatible base URLs (e.g. https://my-mirror.example.com).
+              </p>
+              <input
+                class="mirrors-input"
+                type="text"
+                bind:value={mirrorsInput}
+                oninput={() => (mirrorsDirty = true)}
+                placeholder="https://mirror-one.example.com, https://mirror-two.example.com"
+                spellcheck="false"
+              />
+              <div class="mirrors-actions">
+                <button class="btn primary sm" onclick={saveMirrors} disabled={!mirrorsDirty}>Save Mirrors</button>
+              </div>
             </div>
           </div>
 
@@ -1087,7 +1197,7 @@
   .nav-tab.active {
     background: var(--surface-3, #23252f);
     color: var(--text, #ffffff);
-    border-left: 3px solid var(--accent, #a855f7);
+    border-left: 3px solid var(--accent, var(--accent));
   }
 
   .nav-tab.logout {
@@ -1118,7 +1228,7 @@
   }
 
   .unread-pill {
-    background: var(--accent, #a855f7);
+    background: var(--accent, var(--accent));
     color: #000000;
   }
 
@@ -1283,7 +1393,7 @@
   }
 
   .preset-input:focus {
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
   }
 
   /* Presets Grid */
@@ -1310,13 +1420,13 @@
 
   .preset-card:hover {
     background: var(--surface-3, #20232e);
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
   }
 
   .preset-card.active {
     background: var(--surface-3, #222634);
-    border-color: var(--accent, #a855f7);
-    box-shadow: 0 0 0 1px var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
+    box-shadow: 0 0 0 1px var(--accent, var(--accent));
   }
 
   .custom-preset-card {
@@ -1371,7 +1481,7 @@
 
   .custom-badge {
     font-size: 9px;
-    background: var(--accent, #a855f7);
+    background: var(--accent, var(--accent));
     color: #000000;
     font-weight: 900;
     padding: 1px 4px;
@@ -1407,13 +1517,13 @@
 
   .radio-card:hover {
     background: var(--surface-3, #21232d);
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
   }
 
   .radio-card.active {
     background: var(--surface-3, #222530);
-    border-color: var(--accent, #a855f7);
-    box-shadow: 0 0 0 1px var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
+    box-shadow: 0 0 0 1px var(--accent, var(--accent));
   }
 
   .theme-preview-box {
@@ -1512,13 +1622,13 @@
 
   .color-btn:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
   }
 
   .color-btn.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
-    box-shadow: 0 0 0 1px var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
+    box-shadow: 0 0 0 1px var(--accent, var(--accent));
   }
 
   .color-swatch {
@@ -1594,20 +1704,20 @@
 
   .radius-option-card:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
   }
 
   .radius-option-card.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
-    box-shadow: 0 0 0 1px var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
+    box-shadow: 0 0 0 1px var(--accent, var(--accent));
   }
 
   .radius-sample-box {
     width: 38px;
     height: 38px;
-    border: 2px solid var(--accent, #a855f7);
-    background: rgba(168, 85, 247, 0.12);
+    border: 2px solid var(--accent, var(--accent));
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
     margin-bottom: 4px;
   }
 
@@ -1642,19 +1752,19 @@
 
   .font-option-card:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
   }
 
   .font-option-card.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
-    box-shadow: 0 0 0 1px var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
+    box-shadow: 0 0 0 1px var(--accent, var(--accent));
   }
 
   .font-sample {
     font-size: 24px;
     font-weight: 800;
-    color: var(--accent, #a855f7);
+    color: var(--accent, var(--accent));
     margin-bottom: 6px;
   }
 
@@ -1692,13 +1802,13 @@
 
   .card-opt-btn:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
   }
 
   .card-opt-btn.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
-    box-shadow: 0 0 0 1px var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
+    box-shadow: 0 0 0 1px var(--accent, var(--accent));
   }
 
   .card-opt-title {
@@ -1865,7 +1975,7 @@
   }
 
   .profile-row.current {
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
     background: var(--surface-3, #1e212b);
   }
 
@@ -1894,7 +2004,7 @@
   .active-tag {
     font-size: 9.5px;
     font-weight: 900;
-    background: var(--accent, #a855f7);
+    background: var(--accent, var(--accent));
     color: #000000;
     padding: 2px 6px;
     border-radius: 2px;
@@ -1957,7 +2067,7 @@
   .toggle-switch {
     width: 20px;
     height: 20px;
-    accent-color: var(--accent, #a855f7);
+    accent-color: var(--accent, var(--accent));
     cursor: pointer;
   }
 
@@ -2050,7 +2160,7 @@
   .about-logo-text {
     font-size: 28px;
     font-weight: 900;
-    color: var(--accent, #a855f7);
+    color: var(--accent, var(--accent));
     letter-spacing: -0.03em;
   }
 
@@ -2146,7 +2256,7 @@
   }
 
   .save-btn {
-    background: var(--accent, #a855f7) !important;
+    background: var(--accent, var(--accent)) !important;
     color: #000000 !important;
   }
 
@@ -2170,13 +2280,13 @@
 
   .quality-card:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
   }
 
   .quality-card.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #a855f7);
-    box-shadow: 0 0 0 1px var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
+    box-shadow: 0 0 0 1px var(--accent, var(--accent));
   }
 
   .q-title {
@@ -2220,7 +2330,7 @@
   .lang-pill.active {
     background: var(--surface-3, #22242e);
     color: var(--text, #ffffff);
-    border-color: var(--accent, #a855f7);
+    border-color: var(--accent, var(--accent));
   }
 
   .subtitle-customizer-grid {
@@ -2265,5 +2375,125 @@
     font-size: 13px;
     font-family: inherit;
     outline: none;
+  }
+
+  /* Providers panel */
+  .providers-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .providers-head-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .providers-subtitle {
+    font-size: 14px;
+    font-weight: 800;
+    margin: 0;
+  }
+
+  .providers-hint {
+    font-size: 12px;
+    color: var(--text-faint);
+    margin: 4px 0 12px;
+    line-height: 1.5;
+  }
+
+  .providers-empty {
+    font-size: 12.5px;
+    color: var(--text-faint);
+    margin: 8px 0;
+  }
+
+  .health-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .health-row {
+    display: grid;
+    grid-template-columns: 14px 1fr auto auto auto;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+  }
+
+  .health-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .health-dot.ok {
+    background: var(--green, #10b981);
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+  }
+
+  .health-dot.down {
+    background: #ef4444;
+    box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+  }
+
+  .health-name {
+    font-weight: 800;
+    color: var(--text);
+  }
+
+  .health-kind {
+    color: var(--text-faint);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .health-latency {
+    color: var(--text-dim);
+    font-family: var(--mono, monospace);
+    font-size: 11.5px;
+  }
+
+  .health-state {
+    font-size: 10.5px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    color: #ef4444;
+  }
+
+  .health-state.ok {
+    color: var(--green, #10b981);
+  }
+
+  .mirrors-input {
+    width: 100%;
+    padding: 10px 13px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--mono, monospace);
+    outline: none;
+  }
+
+  .mirrors-input:focus {
+    border-color: var(--accent);
+  }
+
+  .mirrors-actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: flex-end;
   }
 </style>

@@ -16,7 +16,7 @@
     { url: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=160&auto=format&fit=crop&q=80", label: "Cyber Ninja" },
   ];
 
-  const presetColors = ["#a855f7", "#3b82f6", "#10b981", "#a855f7", "#ec4899", "#eab308"];
+  const presetColors = ["#a855f7", "#3b82f6", "#10b981", "#ec4899", "#eab308", "#64748b"];
 
   function closeModal() {
     userStore.showProfileModal = false;
@@ -44,6 +44,7 @@
     role="dialog"
     aria-label="Profile Selection"
     tabindex="-1"
+    onkeydown={(e) => e.key === "Escape" && closeModal()}
   >
     <div class="profile-card-header">
       <div>
@@ -275,7 +276,7 @@
   }
 
   .profile-item:hover .avatar-box {
-    border-color: #a855f7;
+    border-color: var(--accent);
   }
 
   .avatar-box img {
@@ -369,8 +370,8 @@
   }
 
   .add-profile-item:hover .add-icon-box {
-    border-color: #a855f7;
-    background: rgba(168, 85, 247, 0.08);
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
   }
 
   .plus-sign {
@@ -381,7 +382,7 @@
   }
 
   .add-profile-item:hover .plus-sign {
-    color: #a855f7;
+    color: var(--accent);
   }
 
   /* Form */
@@ -415,7 +416,7 @@
   }
 
   .form-input:focus {
-    border-color: #a855f7;
+    border-color: var(--accent);
   }
 
   .avatar-choices {
@@ -443,7 +444,7 @@
   }
 
   .avatar-choice.selected {
-    border-color: #a855f7;
+    border-color: var(--accent);
   }
 
   .color-choices {

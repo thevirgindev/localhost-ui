@@ -95,17 +95,9 @@
 
 <header class="navbar" data-tauri-drag-region>
   <div class="nav-inner">
-    <!-- Far Left: Crunchyroll Logo -->
+    <!-- Far Left: Brand -->
     <div class="nav-left">
       <a class="brand" href="#/">
-        <svg class="cr-logo" viewBox="0 0 24 24" fill="none">
-          <rect x="1" y="1" width="22" height="22" rx="6" fill="#a855f7" />
-          <path
-            d="M12 5.5l1.55 4.35a2 2 0 0 0 1.2 1.2L19.1 12.6l-4.35 1.55a2 2 0 0 0-1.2 1.2L12 19.7l-1.55-4.35a2 2 0 0 0-1.2-1.2L4.9 12.6l4.35-1.55a2 2 0 0 0 1.2-1.2z"
-            fill="#0d0d0d"
-          />
-          <circle cx="17.8" cy="6.2" r="1.3" fill="#0d0d0d" />
-        </svg>
         <span class="brand-text">Luci</span>
       </a>
     </div>
@@ -172,6 +164,7 @@
             role="dialog"
             aria-label="Recent Airings"
             tabindex="-1"
+            onkeydown={(e) => e.key === "Escape" && (showNotifsMenu = false)}
           >
             <div class="menu-header">
               <span class="menu-title">Airing Broadcasts</span>
@@ -237,13 +230,13 @@
         </button>
 
         <!-- Profile Dropdown Menu -->
-        {#if showProfileMenu}
-          <div
-            class="profile-dropdown-menu"
-            onclick={(e) => e.stopPropagation()}
-            role="menu"
-            tabindex="-1"
-          >
+        {#if showProfileMenu}            <div
+              class="profile-dropdown-menu"
+              onclick={(e) => e.stopPropagation()}
+              role="menu"
+              tabindex="-1"
+              onkeydown={(e) => e.key === "Escape" && (showProfileMenu = false)}
+            >
             <!-- User Header -->
             <div class="profile-summary">
               <img src={userStore.activeProfile.avatar} alt="Avatar" class="summary-avatar" />
@@ -389,17 +382,11 @@
     text-decoration: none;
   }
 
-  .cr-logo {
-    width: 32px;
-    height: 32px;
-    flex-shrink: 0;
-  }
-
   .brand-text {
     font-size: 24px;
     font-weight: 900;
     letter-spacing: -0.03em;
-    color: var(--accent, #a855f7);
+    color: var(--text, #ffffff);
     font-family: inherit;
     line-height: 1;
   }
@@ -446,7 +433,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: #a855f7;
+    background: var(--accent);
     border-radius: 2px 2px 0 0;
   }
 
@@ -473,7 +460,7 @@
   }
 
   .nav-icon-btn:hover {
-    color: #a855f7;
+    color: var(--accent);
     background: rgba(255, 255, 255, 0.06);
   }
 
@@ -487,7 +474,7 @@
     right: 6px;
     width: 16px;
     height: 16px;
-    background: #a855f7;
+    background: var(--accent);
     color: #000000;
     font-size: 10px;
     font-weight: 900;
@@ -518,7 +505,7 @@
 
   .profile-pill-btn:hover {
     background: #22242e;
-    border-color: #a855f7;
+    border-color: var(--accent);
   }
 
   .avatar-ring {
@@ -526,7 +513,7 @@
     height: 28px;
     border-radius: 4px;
     overflow: hidden;
-    border: 2px solid #a855f7;
+    border: 2px solid var(--accent);
     flex-shrink: 0;
   }
 
@@ -685,7 +672,7 @@
   .mark-read-btn {
     background: transparent;
     border: none;
-    color: #a855f7;
+    color: var(--accent);
     font-size: 11.5px;
     font-weight: 700;
     cursor: pointer;
@@ -714,8 +701,8 @@
   }
 
   .notif-card.unread {
-    background: rgba(168, 85, 247, 0.06);
-    border-left: 3px solid #a855f7;
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+    border-left: 3px solid var(--accent);
   }
 
   .notif-img {
@@ -762,7 +749,7 @@
   }
 
   .menu-footer-link {
-    color: #a855f7;
+    color: var(--accent);
     font-size: 12px;
     font-weight: 700;
     text-decoration: none;

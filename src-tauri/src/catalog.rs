@@ -1,15 +1,15 @@
+use crate::providers::{self, ResponseCache};
 use crate::types::{AnimeCard, BrowsePage};
 use serde::Deserialize;
-use std::collections::HashMap;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use tauri::State;
-use tokio::sync::Mutex;
 
-const JIKAN: &str = "https://api.jikan.moe/v4";
+/// Managed metadata cache (LuciAPI core).
+pub type LuciCache = ResponseCache;
 
-/// Tolerant list deserializer: Jikan occasionally returns `{}` or `null` for
-/// list fields (rate-limit hiccups / partial data), which would otherwise
-/// abort the whole `AnimeCard` parse with "invalid type: map, expected a sequence".
+/// Tolerant list deserializer: providers occasionally return `{}` or `null`
+/// for list fields (rate-limit hiccups / partial data), which would otherwise
+/// abort the whole `AnimeCard` parse.
 fn seq_or_empty<'de, D, T>(de: D) -> Result<Vec<T>, D::Error>
 where
     D: serde::Deserializer<'de>,
@@ -21,73 +21,13 @@ where
             .into_iter()
             .filter_map(|x| serde_json::from_value::<T>(x).ok())
             .collect()),
-        // Any non-sequence shape degrades to an empty list instead of failing.
         _ => Ok(Vec::new()),
     }
 }
 
 // ---------------------------------------------------------------------------
-// Cache (same design as the old AniList cache)
+// Jikan wire types (only fields the app consumes)
 // ---------------------------------------------------------------------------
-
-struct CacheEntry {
-    json: serde_json::Value,
-    expires: Instant,
-}
-
-pub struct JikanCache {
-    inner: Mutex<HashMap<String, CacheEntry>>,
-}
-
-impl JikanCache {
-    pub fn new() -> Self {
-        Self { inner: Mutex::new(HashMap::new()) }
-    }
-
-    async fn get(&self, key: &str) -> Option<serde_json::Value> {
-        let mut map = self.inner.lock().await;
-        if let Some(e) = map.get(key) {
-            if e.expires > Instant::now() {
-                return Some(e.json.clone());
-            }
-            map.remove(key);
-        }
-        None
-    }
-
-    async fn put(&self, key: String, json: serde_json::Value, ttl: Duration) {
-        let mut map = self.inner.lock().await;
-        if map.len() > 512 {
-            map.retain(|_, e| e.expires > Instant::now());
-            if map.len() > 512 {
-                let mut keys: Vec<_> = map.keys().cloned().collect();
-                keys.sort();
-                for k in keys.into_iter().take(256) {
-                    map.remove(&k);
-                }
-            }
-        }
-        map.insert(key, CacheEntry { json, expires: Instant::now() + ttl });
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Jikan wire types
-// ---------------------------------------------------------------------------
-
-#[derive(Debug, Deserialize)]
-pub struct JikanPagination {
-    pub last_visible_page: i64,
-    pub has_next_page: bool,
-    #[serde(default)]
-    pub items: Option<JikanItems>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct JikanItems {
-    pub count: Option<i64>,
-    pub total: Option<i64>,
-}
 
 #[derive(Debug, Deserialize)]
 pub struct JikanImageSet {
@@ -99,12 +39,6 @@ pub struct JikanImageSet {
 pub struct JikanImage {
     pub image_url: Option<String>,
     pub large_image_url: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct JikanTitleEntry {
-    pub r#type: Option<String>,
-    pub title: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -128,8 +62,7 @@ pub struct JikanDatePart {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct JikanStudio {
-    pub mal_id: i64,
+pub struct JikanNamed {
     pub name: String,
 }
 
@@ -139,39 +72,22 @@ pub struct JikanTrailer {
 }
 
 #[derive(Debug, Deserialize)]
-pub struct JikanAiring {
-    pub prop: Option<JikanAiringCountdown>,
-}
-
-#[derive(Debug, Deserialize)]
-pub struct JikanAiringCountdown {
-    pub episode: Option<i64>,
-    pub seconds_until: Option<i64>,
-    pub time: Option<JikanDatePart>,
-}
-
-#[derive(Debug, Deserialize)]
 pub struct JikanAnime {
     pub mal_id: i64,
-    pub url: Option<String>,
     pub images: Option<JikanImageSet>,
     pub trailer: Option<JikanTrailer>,
     pub title: Option<String>,
     pub title_english: Option<String>,
     pub title_japanese: Option<String>,
     #[serde(default, deserialize_with = "seq_or_empty")]
-    pub titles: Vec<JikanTitleEntry>,
+    pub genres: Vec<JikanNamed>,
     #[serde(default, deserialize_with = "seq_or_empty")]
-    pub genres: Vec<JikanStudio>,
+    pub studios: Vec<JikanNamed>,
     #[serde(default, deserialize_with = "seq_or_empty")]
-    pub studios: Vec<JikanStudio>,
-    #[serde(default, deserialize_with = "seq_or_empty")]
-    pub themes: Vec<JikanStudio>,
+    pub themes: Vec<JikanNamed>,
     pub r#type: Option<String>,
-    pub source: Option<String>,
     pub episodes: Option<i64>,
     pub status: Option<String>,
-    pub airing: Option<bool>,
     pub aired: Option<JikanAired>,
     pub duration: Option<String>,
     pub rating: Option<String>,
@@ -214,9 +130,7 @@ impl JikanAnime {
             .or_else(|| self.aired.as_ref().and_then(|a| a.from.clone()).map(|s| s.chars().take(10).collect()));
         let duration_min = self.duration.as_deref().and_then(|d| {
             if d.contains("min") {
-                d.split_whitespace()
-                    .next()
-                    .and_then(|n| n.parse::<i64>().ok())
+                d.split_whitespace().next().and_then(|n| n.parse::<i64>().ok())
             } else if d.contains("hr") {
                 d.split_whitespace()
                     .next()
@@ -237,7 +151,7 @@ impl JikanAnime {
                 .as_ref()
                 .and_then(|i| i.webp.as_ref().or(i.jpg.as_ref()))
                 .and_then(|img| img.large_image_url.clone().or(img.image_url.clone())),
-            banner: None, // Jikan has no banner art; details page uses the poster
+            banner: None,
             color: None,
             format: self.r#type,
             episodes: self.episodes,
@@ -251,7 +165,7 @@ impl JikanAnime {
             description: self.synopsis,
             start_date: start,
             studio: self.studios.first().map(|s| s.name.clone()),
-            trailer_site: self.trailer.as_ref().and_then(|_| Some("youtube".to_string())),
+            trailer_site: Some("youtube".to_string()).filter(|_| self.trailer.is_some()),
             trailer_id: self.trailer.as_ref().and_then(|t| t.youtube_id.clone()),
             next_airing_episode: None,
             next_airing_at: None,
@@ -267,49 +181,139 @@ impl JikanAnime {
 }
 
 // ---------------------------------------------------------------------------
-// Fetch helper with rate limiting + retry (Jikan: ~3 req/s, 429 on burst)
+// Shikimori fallback (MAL-compatible ids) — third catalog provider
 // ---------------------------------------------------------------------------
 
-fn http_client() -> Result<reqwest::Client, String> {
-    reqwest::Client::builder()
-        .user_agent("luci-app/1.0")
-        .timeout(Duration::from_secs(20))
-        .build()
-        .map_err(|e| e.to_string())
+#[derive(Debug, Deserialize)]
+struct ShikiAnime {
+    id: i64,
+    name: Option<String>,
+    russian: Option<String>,
+    #[serde(default)]
+    image: Option<ShikiImage>,
+    episodes: Option<i64>,
+    status: Option<String>,
+    description: Option<String>,
+    description_source: Option<String>,
+    released_on: Option<String>,
+    aired_on: Option<String>,
+    score: Option<String>,
+    #[serde(default)]
+    genres: Vec<ShikiGenre>,
+    #[serde(default)]
+    studios: Vec<ShikiNamed>,
+    kind: Option<String>,
+    season: Option<String>,
 }
 
-async fn jikan_get(cache: &JikanCache, key: &str, path: &str, ttl: Duration) -> Result<serde_json::Value, String> {
-    if let Some(hit) = cache.get(key).await {
-        return Ok(hit);
+#[derive(Debug, Deserialize)]
+struct ShikiImage {
+    original: Option<String>,
+    preview: Option<String>,
+    #[serde(default)]
+    banner: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ShikiGenre {
+    name: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct ShikiNamed {
+    name: Option<String>,
+}
+
+impl ShikiAnime {
+    fn into_card(self) -> AnimeCard {
+        let kind = self.kind.as_deref().map(|k| match k {
+            "tv" => "TV".to_string(),
+            "movie" => "MOVIE".to_string(),
+            "ova" => "OVA".to_string(),
+            "ona" => "ONA".to_string(),
+            "special" => "SPECIAL".to_string(),
+            other => other.to_uppercase(),
+        });
+        AnimeCard {
+            id: self.id,
+            mal_id: Some(self.id), // Shikimori ids mirror MAL ids
+            title: self.name.unwrap_or_else(|| "Unknown".into()),
+            title_english: None,
+            title_native: self.russian,
+            cover: self.image.as_ref().and_then(|i| {
+                i.original
+                    .as_ref()
+                    .or(i.preview.as_ref())
+                    .map(|p| format!("https://shikimori.one{p}"))
+            }),
+            banner: self
+                .image
+                .as_ref()
+                .and_then(|i| i.banner.as_ref())
+                .map(|b| format!("https://shikimori.one{b}")),
+            color: None,
+            format: kind,
+            episodes: self.episodes,
+            duration: None,
+            status: self.status.as_deref().map(|s| match s {
+                "ongoing" => "RELEASING".to_string(),
+                "released" => "FINISHED".to_string(),
+                "anons" => "NOT_YET_RELEASED".to_string(),
+                other => other.to_uppercase(),
+            }),
+            season: self.season.as_deref().map(|s| {
+                s.split('_').next().unwrap_or(s).to_uppercase()
+            }),
+            season_year: self
+                .aired_on
+                .as_deref()
+                .and_then(|s| s.get(0..4))
+                .and_then(|y| y.parse().ok()),
+            average_score: self.score.as_deref().and_then(|s| s.parse::<f64>().ok()).map(|v| (v * 10.0) as i64),
+            popularity: None,
+            genres: self.genres.iter().filter_map(|g| g.name.clone()).collect(),
+            description: self.description.or(self.description_source),
+            start_date: self.aired_on.as_deref().map(|s| s.chars().take(10).collect()),
+            studio: self.studios.first().and_then(|s| s.name.clone()),
+            trailer_site: None,
+            trailer_id: None,
+            next_airing_episode: None,
+            next_airing_at: None,
+            rank: None,
+            members: None,
+            favorites: None,
+            aired_string: self.released_on,
+            broadcast: None,
+            rating: None,
+            themes: Vec::new(),
+        }
     }
-    let client = http_client()?;
-    let url = format!("{JIKAN}{path}");
-    let mut backoff = Duration::from_millis(500);
-    let mut attempt = 0;
-    loop {
-        attempt += 1;
-        tokio::time::sleep(Duration::from_millis(350)).await; // baseline politeness delay
-        let resp = client
-            .get(&url)
-            .send()
-            .await
-            .map_err(|e| format!("network: {e}"))?;
-        let status = resp.status();
-        if status.as_u16() == 429 && attempt <= 3 {
-            tokio::time::sleep(backoff).await;
-            backoff *= 2;
-            continue;
-        }
-        if status.as_u16() == 404 {
-            return Err("not found".into());
-        }
-        if !status.is_success() {
-            return Err(format!("jikan returned HTTP {status}"));
-        }
-        let json: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-        cache.put(key.to_string(), json.clone(), ttl).await;
-        return Ok(json);
-    }
+}
+
+async fn shiki_get(cache: &ResponseCache, key: &str, path: &str) -> Result<serde_json::Value, String> {
+    providers::cached_json(cache, key, &format!("{}{path}", providers::SHIKI), Duration::from_secs(1800)).await
+}
+
+fn parse_shiki_list(value: &serde_json::Value) -> Vec<AnimeCard> {
+    value
+        .as_array()
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|m| serde_json::from_value::<ShikiAnime>(m.clone()).ok())
+                .map(ShikiAnime::into_card)
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+// ---------------------------------------------------------------------------
+// Fetch helpers
+// ---------------------------------------------------------------------------
+
+/// Jikan GET with politeness delay + shared cache.
+async fn jikan_get(cache: &ResponseCache, key: &str, path: &str, ttl: Duration) -> Result<serde_json::Value, String> {
+    tokio::time::sleep(Duration::from_millis(350)).await; // Jikan: ~3 req/s
+    providers::cached_json(cache, key, &format!("{}{path}", providers::JIKAN), ttl).await
 }
 
 fn parse_anime_list(value: &serde_json::Value) -> Vec<AnimeCard> {
@@ -326,37 +330,58 @@ fn parse_anime_list(value: &serde_json::Value) -> Vec<AnimeCard> {
 }
 
 // ---------------------------------------------------------------------------
-// Commands — same surface as before, Jikan underneath
+// Catalog commands — fallback chain: Jikan → Kitsu → Shikimori
 // ---------------------------------------------------------------------------
 
 #[tauri::command]
-pub async fn trending(cache: State<'_, JikanCache>, page: Option<i64>) -> Result<Vec<AnimeCard>, String> {
+pub async fn trending(cache: State<'_, LuciCache>, page: Option<i64>) -> Result<Vec<AnimeCard>, String> {
     let page = page.unwrap_or(1);
-    match jikan_get(&cache, &format!("trending:{page}"), &format!("/top/anime?page={page}&limit=24&filter=airing"), Duration::from_secs(600)).await {
+    let jikan = jikan_get(
+        &cache,
+        &format!("jikan:trending:{page}"),
+        &format!("/top/anime?page={page}&limit=24&filter=airing"),
+        Duration::from_secs(600),
+    )
+    .await;
+    match jikan {
         Ok(json) => Ok(parse_anime_list(&json)),
-        Err(_) => crate::kitsu::trending().await,
+        Err(_) => match crate::kitsu::trending().await {
+            Ok(cards) => Ok(cards),
+            Err(_) => shiki_get(&cache, "shiki:trending", "/animes?limit=24&order=ranked")
+                .await
+                .map(|v| parse_shiki_list(&v)),
+        },
     }
 }
 
 #[tauri::command]
-pub async fn popular(cache: State<'_, JikanCache>, page: Option<i64>) -> Result<Vec<AnimeCard>, String> {
+pub async fn popular(cache: State<'_, LuciCache>, page: Option<i64>) -> Result<Vec<AnimeCard>, String> {
     let page = page.unwrap_or(1);
-    let jikan = jikan_get(&cache, &format!("popular:{page}"), &format!("/top/anime?page={page}&limit=24"), Duration::from_secs(3600)).await;
+    let jikan = jikan_get(
+        &cache,
+        &format!("jikan:popular:{page}"),
+        &format!("/top/anime?page={page}&limit=24"),
+        Duration::from_secs(3600),
+    )
+    .await;
     match jikan {
-        Ok(v) => Ok(parse_anime_list(&v)),
-        Err(_) => {
-            if page == 1 {
-                crate::kitsu::popular().await
-            } else {
-                Err("catalog provider unavailable".into())
-            }
-        }
+        Ok(json) => Ok(parse_anime_list(&json)),
+        Err(_) => match crate::kitsu::popular().await {
+            Ok(cards) if page == 1 => Ok(cards),
+            _ => shiki_get(
+                &cache,
+                &format!("shiki:popular:{page}"),
+                &format!("/animes?limit=24&page={page}&order=popularity"),
+            )
+            .await
+            .map(|v| parse_shiki_list(&v)),
+        },
     }
 }
 
 #[tauri::command]
 pub async fn season(
-    cache: State<'_, JikanCache>,
+    cache: State<'_, LuciCache>,
     year: i64,
     season: String,
     page: Option<i64>,
@@ -365,15 +390,23 @@ pub async fn season(
     let s = season.to_lowercase();
     let jikan = jikan_get(
         &cache,
-        &format!("season:{year}:{s}:{page}"),
+        &format!("jikan:season:{year}:{s}:{page}"),
         &format!("/seasons/{year}/{s}?page={page}&limit=24"),
         Duration::from_secs(3600),
     )
     .await;
     match jikan {
         Ok(json) => Ok(parse_anime_list(&json)),
-        Err(_) if page == 1 => crate::kitsu::season(year, &s).await,
-        Err(e) => Err(e),
+        Err(_) => match crate::kitsu::season(year, &s).await {
+            Ok(cards) if page == 1 => Ok(cards),
+            _ => shiki_get(
+                &cache,
+                &format!("shiki:season:{year}:{s}:{page}"),
+                &format!("/animes?limit=24&page={page}&season={s}_{year}"),
+            )
+            .await
+            .map(|v| parse_shiki_list(&v)),
+        },
     }
 }
 
@@ -391,16 +424,12 @@ pub struct BrowseFilters {
 }
 
 #[tauri::command]
-pub async fn browse(cache: State<'_, JikanCache>, filters: BrowseFilters) -> Result<BrowsePage, String> {
+pub async fn browse(cache: State<'_, LuciCache>, filters: BrowseFilters) -> Result<BrowsePage, String> {
     let page = filters.page.unwrap_or(1);
     let mut params: Vec<String> = vec![format!("page={page}"), "limit=24".into(), "sfw=true".into()];
 
     if let Some(q) = filters.search.as_deref().map(str::trim).filter(|q| !q.is_empty()) {
-        let encoded: String = q
-            .chars()
-            .map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c.to_string() } else { format!("%{:02X}", c as u32) })
-            .collect();
-        params.push(format!("q={encoded}"));
+        params.push(format!("q={}", providers::urlencode(q)));
     }
     if let Some(year) = filters.year {
         params.push(format!("year={year}"));
@@ -409,7 +438,6 @@ pub async fn browse(cache: State<'_, JikanCache>, filters: BrowseFilters) -> Res
         params.push(format!("season={}", season.to_lowercase()));
     }
     if let Some(format) = filters.format.as_deref().filter(|f| !f.is_empty()) {
-        // Jikan type names: TV, Movie, OVA, ONA, Special, TV
         let jf = match format.to_uppercase().as_str() {
             "MOVIE" => "movie".into(),
             "TV_SHORT" => "tv".into(),
@@ -428,7 +456,6 @@ pub async fn browse(cache: State<'_, JikanCache>, filters: BrowseFilters) -> Res
     }
     if let Some(genres) = &filters.genres {
         if !genres.is_empty() {
-            // Jikan accepts genre names in `genres=` (e.g. "Action").
             let names: Vec<String> = genres.iter().map(|g| g.replace(' ', "%20")).collect();
             params.push(format!("genres={}", names.join(",")));
         }
@@ -444,25 +471,20 @@ pub async fn browse(cache: State<'_, JikanCache>, filters: BrowseFilters) -> Res
         params.push(format!("order_by={js}&sort=desc"));
     }
 
-    let key = format!("browse:{}:{page}", params.join("&"));
+    let key = format!("jikan:browse:{}:{page}", params.join("&"));
     let path = format!("/anime?{}", params.join("&"));
     let jikan = jikan_get(&cache, &key, &path, Duration::from_secs(900)).await;
     match jikan {
         Ok(json) => {
             let cards = parse_anime_list(&json);
-            let has_next = json
-                .pointer("/pagination/has_next_page")
-                .and_then(|v| v.as_bool())
-                .unwrap_or(false);
-            let total = json
-                .pointer("/pagination/items/total")
-                .and_then(|v| v.as_i64());
+            let has_next = json.pointer("/pagination/has_next_page").and_then(|v| v.as_bool()).unwrap_or(false);
+            let total = json.pointer("/pagination/items/total").and_then(|v| v.as_i64());
             Ok(BrowsePage { cards, has_next_page: has_next, total })
         }
         Err(_) => {
-            // Kitsu failover: search or popularity sort (page 1 only).
+            // Kitsu failover: search or popularity (page 1 only).
             if page > 1 {
-                return Err("catalog provider unavailable".into());
+                return Err("all catalog providers unreachable".into());
             }
             let cards = if let Some(q) = filters.search.as_deref().map(str::trim).filter(|q| !q.is_empty()) {
                 crate::kitsu::search(q).await?
@@ -475,35 +497,42 @@ pub async fn browse(cache: State<'_, JikanCache>, filters: BrowseFilters) -> Res
 }
 
 #[tauri::command]
-pub async fn anime_details(cache: State<'_, JikanCache>, id: i64) -> Result<AnimeCard, String> {
+pub async fn anime_details(cache: State<'_, LuciCache>, id: i64) -> Result<AnimeCard, String> {
     // Kitsu ids live in their own offset space.
-    if id >= crate::kitsu::KITSU_ID_OFFSET {
-        return crate::kitsu::details(id - crate::kitsu::KITSU_ID_OFFSET).await;
+    if id >= providers::KITSU_ID_OFFSET {
+        return crate::kitsu::details(id - providers::KITSU_ID_OFFSET).await;
     }
 
-    let jikan = jikan_get(&cache, &format!("details:{id}"), &format!("/anime/{id}/full"), Duration::from_secs(3600)).await;
+    let jikan = jikan_get(&cache, &format!("jikan:details:{id}"), &format!("/anime/{id}/full"), Duration::from_secs(3600)).await;
     match jikan {
-        Ok(json) => match serde_json::from_value::<JikanAnime>(
-            json.get("data").cloned().unwrap_or(serde_json::Value::Null),
-        ) {
+        Ok(json) => match serde_json::from_value::<JikanAnime>(json.get("data").cloned().unwrap_or(serde_json::Value::Null)) {
             Ok(anime) => Ok(anime.into_card()),
             Err(e) => {
-                eprintln!("[luci] details parse failed for {id}: {e}; trying Kitsu fallback");
-                let mapped = kitsu_by_mal(id).await?;
+                eprintln!("[luci] details parse failed for {id}: {e}; trying Kitsu, then Shikimori");
+                let mapped = kitsu_by_mal(&cache, id).await?;
                 mapped.ok_or_else(|| format!("anime details parse failed: {e}"))
             }
         },
         Err(_) => {
-            // Kitsu detail fallback requires resolving the MAL id → Kitsu id.
-            let mapped = kitsu_by_mal(id).await?;
+            let mapped = kitsu_by_mal(&cache, id).await?;
             mapped.ok_or_else(|| "anime not found".to_string())
         }
     }
 }
 
-async fn kitsu_by_mal(mal_id: i64) -> Result<Option<AnimeCard>, String> {
-    let json = crate::kitsu::lookup_by_mal(mal_id).await?;
-    Ok(json.map(crate::kitsu::into_card))
+async fn kitsu_by_mal(cache: &ResponseCache, mal_id: i64) -> Result<Option<AnimeCard>, String> {
+    if let Ok(json) = crate::kitsu::lookup_by_mal(mal_id).await {
+        if let Some(res) = json {
+            return Ok(Some(crate::kitsu::into_card(res)));
+        }
+    }
+    // Shikimori ids mirror MAL ids — direct detail fetch.
+    if let Ok(json) = shiki_get(cache, &format!("shiki:details:{mal_id}"), &format!("/animes/{mal_id}")).await {
+        if let Ok(shiki) = serde_json::from_value::<ShikiAnime>(json) {
+            return Ok(Some(shiki.into_card()));
+        }
+    }
+    Ok(None)
 }
 
 /// Current season info (season calendar header).
@@ -541,11 +570,13 @@ fn capitalize(s: &str) -> String {
     }
 }
 
-/// Jikan airing schedule for a season page badge (optional enrichment).
 #[tauri::command]
-pub async fn season_now(cache: State<'_, JikanCache>) -> Result<Vec<AnimeCard>, String> {
-    let json = jikan_get(&cache, "season-now", "/seasons/now?limit=24", Duration::from_secs(900)).await?;
-    Ok(parse_anime_list(&json))
+pub async fn season_now(cache: State<'_, LuciCache>) -> Result<Vec<AnimeCard>, String> {
+    let jikan = jikan_get(&cache, "jikan:season-now", "/seasons/now?limit=24", Duration::from_secs(900)).await;
+    match jikan {
+        Ok(json) => Ok(parse_anime_list(&json)),
+        Err(_) => crate::kitsu::trending().await,
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -589,10 +620,10 @@ pub struct JikanPersonRef {
 }
 
 #[tauri::command]
-pub async fn anime_characters(cache: State<'_, JikanCache>, id: i64) -> Result<Vec<CharacterCard>, String> {
+pub async fn anime_characters(cache: State<'_, LuciCache>, id: i64) -> Result<Vec<CharacterCard>, String> {
     let json = jikan_get(
         &cache,
-        &format!("characters:{id}"),
+        &format!("jikan:characters:{id}"),
         &format!("/anime/{id}/characters"),
         Duration::from_secs(3600),
     )

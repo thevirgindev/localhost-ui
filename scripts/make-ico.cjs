@@ -52,16 +52,7 @@ function makeIcoPng(size) {
     return dist <= 0 ? 1 : clamp(0.5 - dist, 0, 1);
   }
   const bg = [10, 12, 16, 255];
-  const purple = [168, 85, 247, 255];
-  const dark = [13, 13, 13, 255];
-  function diamond(cx, cy, a, b, px, py) {
-    const d = Math.abs(px - cx) / a + Math.abs(py - cy) / b;
-    return clamp((1 - d) * 40, 0, 1);
-  }
-  function circle(cx, cy, r, px, py) {
-    const d = Math.hypot(px - cx, py - cy) - r * s;
-    return clamp(0.5 - d, 0, 1);
-  }
+  const white = [235, 235, 240, 255];
   const raw = Buffer.alloc(size * (size * 4 + 1));
   const s = size / 1024;
   for (let py = 0; py < size; py++) {
@@ -70,20 +61,14 @@ function makeIcoPng(size) {
     for (let px = 0; px < size; px++) {
       const i = rowStart + 1 + px * 4;
       const outer = rrect(32 * s, 32 * s, size - 64 * s, size - 64 * s, 200 * s, px, py);
-      const inner = rrect(160 * s, 160 * s, size - 320 * s, size - 320 * s, 130 * s, px, py);
-      const sparkle = Math.max(
-        diamond(512 * s, 512 * s, 95 * s, 300 * s, px, py),
-        diamond(512 * s, 512 * s, 300 * s, 95 * s, px, py),
-      );
-      const dot = circle(720 * s, 330 * s, 62, px, py);
-      const mark = Math.max(sparkle, dot);
+      // white "L" monogram: vertical stem + horizontal foot, rounded ends
+      const stem = rrect(330 * s, 250 * s, 130 * s, 520 * s, 65 * s, px, py);
+      const foot = rrect(330 * s, 640 * s, 390 * s, 130 * s, 65 * s, px, py);
+      const mark = Math.max(stem, foot);
       let r = bg[0], g = bg[1], b = bg[2], a = bg[3] * outer;
-      r = r * (1 - inner) + purple[0] * inner;
-      g = g * (1 - inner) + purple[1] * inner;
-      b = b * (1 - inner) + purple[2] * inner;
-      r = r * (1 - mark) + dark[0] * mark;
-      g = g * (1 - mark) + dark[1] * mark;
-      b = b * (1 - mark) + dark[2] * mark;
+      r = r * (1 - mark) + white[0] * mark;
+      g = g * (1 - mark) + white[1] * mark;
+      b = b * (1 - mark) + white[2] * mark;
       raw[i] = Math.round(clamp(r, 0, 255));
       raw[i + 1] = Math.round(clamp(g, 0, 255));
       raw[i + 2] = Math.round(clamp(b, 0, 255));

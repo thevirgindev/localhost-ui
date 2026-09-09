@@ -7,14 +7,6 @@
 <footer class="luci-footer" id="main-footer">
   <div class="footer-inner">
     <div class="footer-brand">
-      <span class="brand-mark">
-        <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
-          <path
-            d="M12 4.5l1.4 3.9a2 2 0 0 0 1.2 1.2l3.9 1.4-3.9 1.4a2 2 0 0 0-1.2 1.2L12 17.5l-1.4-3.9a2 2 0 0 0-1.2-1.2L5.5 11l3.9-1.4a2 2 0 0 0 1.2-1.2z"
-            fill="currentColor"
-          />
-        </svg>
-      </span>
       <span class="brand-name">Luci</span>
       <span class="status-dot"></span>
       <span class="status-text">Local Mode</span>
@@ -61,18 +53,6 @@
     display: flex;
     align-items: center;
     gap: 9px;
-  }
-
-  .brand-mark {
-    width: 24px;
-    height: 24px;
-    background: var(--accent, #a855f7);
-    color: #0d0d0d;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
   }
 
   .brand-name {
@@ -123,6 +103,6 @@
   }
 
   .top-btn:hover {
-    color: var(--accent, #a855f7);
+    color: var(--accent, var(--accent));
   }
 </style>

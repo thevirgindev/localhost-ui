@@ -10,7 +10,10 @@
   let card = $state<AnimeCard | null>(null);
   let episodes = $state<EpisodeEntry[]>([]);
   let streamUrl = $state("");
-  let isEmbed = $state(false);
+  let streamKind = $state<"hls" | "file" | "embed">("file");
+  let serverName = $state("");
+  let triedUrls = $state<string[]>([]);
+  let switching = $state(false);
   let loading = $state(true);
   let error = $state("");
 
@@ -84,11 +87,27 @@
     loadEpisode(animeId, ep);
   });
 
+  function applyPlayable(p: { url: string; kind: string; server: string }) {
+    if (p.url.startsWith("/") || /^[A-Za-z]:[\\/]/.test(p.url)) {
+      // Local file — needs the asset-protocol conversion.
+      import("@tauri-apps/api/core").then(({ convertFileSrc }) => {
+        streamUrl = convertFileSrc(p.url);
+        streamKind = "file";
+        serverName = p.server;
+      });
+      return;
+    }
+    streamUrl = p.url;
+    streamKind = p.kind === "hls" || p.kind === "embed" ? p.kind : "file";
+    serverName = p.server;
+  }
+
   async function loadEpisode(animeId: number, epNumber: number) {
     loading = true;
     error = "";
     streamUrl = "";
-    isEmbed = false;
+    triedUrls = [];
+    switching = false;
     clearPlayback();
     try {
       if (!card) {
@@ -106,42 +125,56 @@
         return;
       }
 
-      if (!entry.url) {
-        error = "No playable source for this episode.";
-        loading = false;
-        return;
-      }
-
-      if (entry.url.startsWith("/") || /^[A-Za-z]:[\\/]/.test(entry.url)) {
-        const { convertFileSrc } = await import("@tauri-apps/api/core");
-        streamUrl = convertFileSrc(entry.url);
-      } else if (entry.url.includes("crunchyroll.com/embed")) {
-        isEmbed = true;
-        streamUrl = entry.url;
-      } else {
-        streamUrl = entry.url;
-      }
+      // Ask the backend for a live, probed server. Its chain:
+      // local library → ani.zip direct HLS → embeds → user mirrors.
+      const playable = await api.resolveEpisode(animeId, card.title, card.titleEnglish, epNumber, triedUrls);
+      triedUrls = [...triedUrls, playable.url];
+      applyPlayable(playable);
     } catch (e) {
-      error = String(e);
+      error = String(e).replace(/^Error:\s*/, "");
     } finally {
       loading = false;
     }
+  }
+
+  // Current server died (probe miss, HLS fatal, decode error) — walk the chain.
+  async function switchServer() {
+    if (!card || switching) return;
+    switching = true;
+    clearPlayback();
+    streamUrl = "";
+    try {
+      const playable = await api.resolveEpisode(id, card.title, card.titleEnglish, episode, triedUrls);
+      triedUrls = [...triedUrls, playable.url];
+      applyPlayable(playable);
+    } catch (e) {
+      error = `All servers exhausted. ${String(e).replace(/^Error:\s*/, "")}`;
+    } finally {
+      switching = false;
+    }
+  }
+
+  function onVideoError() {
+    if (streamUrl && !switching) switchServer();
   }
 
   // Attach stream once video element is ready
   $effect(() => {
     const el = videoEl;
     const url = streamUrl;
-    if (!el || !url || isEmbed || wiredFor === url) return;
+    if (!el || !url || streamKind === "embed" || wiredFor === url) return;
     wiredFor = url;
 
-    if (url.endsWith(".m3u8")) {
+    if (streamKind === "hls" || url.includes(".m3u8")) {
       import("hls.js").then((mod) => {
         const Hls = mod.default;
         if (Hls.isSupported()) {
           hls = new Hls({ enableWorker: true });
           hls.loadSource(url);
           hls.attachMedia(el);
+          hls.on(Hls.Events.ERROR, (_evt, data) => {
+            if (data.fatal) switchServer();
+          });
         } else if (el.canPlayType("application/vnd.apple.mpegurl")) {
           el.src = url;
         } else {
@@ -321,6 +354,8 @@
 <div
   class="watch-page-container"
   bind:this={playerContainer}
+  role="application"
+  aria-label="Video player"
   onmousemove={triggerControlsActivity}
   onmouseleave={() => {
     if (isPlaying) showControls = false;
@@ -382,6 +417,22 @@
         </svg>
         <span>Episodes ({episodes.length})</span>
       </button>
+
+      {#if serverName && !loading && !error}
+        <button
+          class="server-pill"
+          onclick={switchServer}
+          disabled={switching}
+          title="Switch to the next available server"
+        >
+          <span class="server-dot"></span>
+          <span>{switching ? "Switching…" : serverName}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+            <polyline points="21 3 21 9 15 9" />
+          </svg>
+        </button>
+      {/if}
     </div>
   </header>
 
@@ -401,7 +452,7 @@
           Return to Anime Overview
         </button>
       </div>
-    {:else if isEmbed}
+    {:else if streamKind === "embed"}
       <div class="embed-stage">
         <iframe
           src={streamUrl}
@@ -426,6 +477,7 @@
           onloadedmetadata={onLoadedMetadata}
           ontimeupdate={onTimeUpdate}
           onended={onEnded}
+          onerror={onVideoError}
         ></video>
 
         <!-- Skip Intro Floating Button -->
@@ -452,6 +504,8 @@
             onclick={(e) => e.stopPropagation()}
             role="dialog"
             aria-label="Next episode prompt"
+            tabindex="-1"
+            onkeydown={(e) => e.key === "Escape" && (showUpNextPrompt = false)}
           >
             <div class="up-next-content">
               <span class="up-next-tag">Up Next in {upNextCountdown}s</span>
@@ -486,6 +540,12 @@
           aria-valuemin="0"
           aria-valuemax={duration}
           aria-valuenow={currentTime}
+          aria-label="Seek timeline"
+          onkeydown={(e) => {
+            if (!videoEl) return;
+            if (e.key === "ArrowRight") videoEl.currentTime = Math.min(duration, videoEl.currentTime + 10);
+            if (e.key === "ArrowLeft") videoEl.currentTime = Math.max(0, videoEl.currentTime - 10);
+          }}
         >
           <div class="timeline-buffered" style="width: {bufferedPercent}%"></div>
           <div
@@ -1446,6 +1506,7 @@
     color: #ffffff;
     display: -webkit-box;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
@@ -1485,6 +1546,39 @@
     font-weight: 700;
     border: none;
     cursor: pointer;
+  }
+
+  .server-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #e8e8ee;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.12s ease, border-color 0.12s ease;
+  }
+
+  .server-pill:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: var(--accent);
+  }
+
+  .server-pill:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .server-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green, #10b981);
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
   }
 
   .embed-stage {

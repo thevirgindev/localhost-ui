@@ -335,7 +335,7 @@
 
       <button class="menu-item" onclick={toggleAnimeWatchlist} role="menuitem">
         {#if animeCtx.isWatchlisted}
-          <svg viewBox="0 0 24 24" fill="#a855f7" class="item-icon">
+          <svg viewBox="0 0 24 24" style="fill: var(--accent)" class="item-icon">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
           </svg>
           <span class="item-label">In Watchlist</span>
@@ -577,7 +577,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #a855f7;
+    color: var(--accent);
   }
 
   .header-title {
@@ -625,25 +625,25 @@
   }
 
   .menu-item.primary {
-    color: #a855f7;
+    color: var(--accent);
     font-weight: 700;
   }
 
   .menu-item.primary:hover {
-    background: rgba(168, 85, 247, 0.16);
+    background: color-mix(in srgb, var(--accent) 16%, transparent);
     color: #c084fc;
   }
 
   .highlight-search {
-    background: rgba(168, 85, 247, 0.08);
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
   }
 
   .highlight-search:hover {
-    background: rgba(168, 85, 247, 0.18);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
   }
 
   .search-color {
-    color: #a855f7;
+    color: var(--accent);
   }
 
   .item-icon {
@@ -674,7 +674,7 @@
   }
 
   .item-shortcut.active-sub {
-    color: #a855f7;
+    color: var(--accent);
     font-weight: 700;
   }
 
@@ -712,7 +712,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #a855f7;
+    background: var(--accent);
     flex-shrink: 0;
   }
 

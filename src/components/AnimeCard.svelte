@@ -183,7 +183,7 @@
     position: absolute;
     top: 8px;
     left: 8px;
-    background: #a855f7;
+    background: var(--accent);
     color: #0d0d0d;
     font-size: 10px;
     font-weight: 800;
@@ -220,9 +220,9 @@
   .quick-bookmark.active {
     opacity: 1;
     transform: scale(1);
-    background: #a855f7;
+    background: var(--accent);
     color: #0d0d0d;
-    border-color: #a855f7;
+    border-color: var(--accent);
   }
 
   .card:hover .quick-bookmark,
@@ -281,7 +281,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: #a855f7;
+    background: var(--accent);
     color: #000000;
     font-size: 13px;
     font-weight: 800;
@@ -289,7 +289,7 @@
     border-radius: 999px;
     transform: scale(0.88) translateY(6px);
     opacity: 0;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65), 0 0 14px rgba(168, 85, 247, 0.45);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65), 0 0 14px color-mix(in srgb, var(--accent) 45%, transparent);
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 opacity 0.18s ease,
                 background 0.12s ease;
@@ -322,7 +322,7 @@
 
   .card:hover .title,
   .card:focus-visible .title {
-    color: #a855f7;
+    color: var(--accent);
   }
 
   .sub {
@@ -335,37 +335,29 @@
     color: #8c9099;
   }
 
-  .meta-sep {
-    color: #4a4d55;
-  }
-
-  .genre-preview {
-    color: #a0a4af;
-  }
-
   .airing-pulse {
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #a855f7;
+    background: var(--accent);
     display: inline-block;
     flex-shrink: 0;
-    box-shadow: 0 0 8px #a855f7;
+    box-shadow: 0 0 8px var(--accent);
     animation: pulse 1.8s infinite;
   }
 
   @keyframes pulse {
     0% {
       transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent);
     }
     70% {
       transform: scale(1.05);
-      box-shadow: 0 0 0 6px rgba(168, 85, 247, 0);
+      box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent);
     }
     100% {
       transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent);
     }
   }
 

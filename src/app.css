@@ -369,9 +369,9 @@ img {
 .spinner {
   width: 44px;
   height: 44px;
-  border: 3.5px solid rgba(168, 85, 247, 0.08);
-  border-top-color: #a855f7;
-  border-right-color: rgba(168, 85, 247, 0.85);
+  border: 3.5px solid color-mix(in srgb, var(--accent) 8%, transparent);
+  border-top-color: var(--accent);
+  border-right-color: color-mix(in srgb, var(--accent) 85%, transparent);
   border-radius: 50%;
   animation: spin 0.75s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
   margin: 0 auto;
@@ -379,7 +379,7 @@ img {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 16px rgba(168, 85, 247, 0.2);
+  box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 20%, transparent);
 }
 
 @keyframes spin {

@@ -34,8 +34,6 @@ pub struct KitsuResource {
 pub struct KitsuAttributes {
     #[serde(default)]
     pub titles: std::collections::HashMap<String, String>,
-    #[serde(default)]
-    pub abbreviated_titles: Vec<String>,
     pub canonical_title: Option<String>,
     pub poster_image: Option<KitsuImage>,
     pub cover_image: Option<KitsuCover>,
@@ -43,8 +41,6 @@ pub struct KitsuAttributes {
     pub episode_count: Option<i64>,
     pub episode_length: Option<i64>,
     pub status: Option<String>,
-    #[serde(default)]
-    pub age_rating: Option<String>,
     pub average_rating: Option<String>,
     pub popularity_rank: Option<i64>,
     pub synopsis: Option<String>,
@@ -62,7 +58,6 @@ pub struct KitsuImage {
 
 #[derive(Debug, serde::Deserialize)]
 pub struct KitsuCover {
-    pub tiny: Option<String>,
     pub small: Option<String>,
     pub large: Option<String>,
     pub original: Option<String>,

@@ -1,5 +1,5 @@
 // Generates a 1024x1024 RGBA PNG app icon without any dependencies.
-// Design: dark rounded square, purple inner rounded square, dark sparkle mark.
+// Design: minimal monochrome — dark rounded square, white "L" monogram.
 const zlib = require("zlib");
 const fs = require("fs");
 const path = require("path");
@@ -24,19 +24,10 @@ function roundedRectMask(x, y, w, h, r, px, py) {
 }
 
 const bg = [10, 12, 16, 255]; // #0a0c10
-const purple = [168, 85, 247, 255]; // #a855f7
-const dark = [13, 13, 13, 255]; // #0d0d0d
+const white = [235, 235, 240, 255]; // #ebebf0
 
-// Inside-test for a diamond (|dx|/a + |dy|/b <= 1) with a soft AA edge.
-function diamondMask(cx, cy, a, b, px, py) {
-  const d = Math.abs(px - cx) / a + Math.abs(py - cy) / b;
-  return clamp((1 - d) * 40, 0, 1);
-}
-
-function circleMask(cx, cy, r, px, py) {
-  const d = Math.hypot(px - cx, py - cy) - r;
-  return clamp(0.5 - d, 0, 1);
-}
+// Inside-test for a rounded bar (the L strokes) with a soft AA edge.
+const barMask = roundedRectMask;
 
 const raw = Buffer.alloc(SIZE * (SIZE * 4 + 1));
 
@@ -48,28 +39,18 @@ for (let py = 0; py < SIZE; py++) {
 
     // outer dark rounded square (with transparency outside)
     const outer = roundedRectMask(32, 32, SIZE - 64, SIZE - 64, 200, px, py);
-    // inner purple rounded square
-    const inner = roundedRectMask(160, 160, SIZE - 320, SIZE - 320, 130, px, py);
-    // dark 4-point sparkle in the middle (union of two thin diamonds)
-    const sparkle = Math.max(
-      diamondMask(512, 512, 95, 300, px, py),
-      diamondMask(512, 512, 300, 95, px, py),
-    );
-    // small dark accent dot (top-right of the sparkle)
-    const dot = circleMask(720, 330, 62, px, py);
-    const mark = Math.max(sparkle, dot);
+    // white "L" monogram: vertical stem + horizontal foot, rounded ends
+    const stem = barMask(330, 250, 130, 520, 65, px, py);
+    const foot = barMask(330, 640, 390, 130, 65, px, py);
+    const mark = Math.max(stem, foot);
 
     let r = 0, g = 0, b = 0, a = 0;
     // start from bg
     r = bg[0]; g = bg[1]; b = bg[2]; a = bg[3] * outer;
-    // blend purple over it
-    r = r * (1 - inner) + purple[0] * inner;
-    g = g * (1 - inner) + purple[1] * inner;
-    b = b * (1 - inner) + purple[2] * inner;
-    // blend dark sparkle over that
-    r = r * (1 - mark) + dark[0] * mark;
-    g = g * (1 - mark) + dark[1] * mark;
-    b = b * (1 - mark) + dark[2] * mark;
+    // blend white monogram over it
+    r = r * (1 - mark) + white[0] * mark;
+    g = g * (1 - mark) + white[1] * mark;
+    b = b * (1 - mark) + white[2] * mark;
 
     raw[i] = Math.round(clamp(r, 0, 255));
     raw[i + 1] = Math.round(clamp(g, 0, 255));

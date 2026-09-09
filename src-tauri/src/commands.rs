@@ -1,6 +1,6 @@
-use crate::catalog::JikanCache;
+use crate::catalog::LuciCache;
 use crate::db::Db;
-use crate::types::{AnimeCard, EpisodeEntry, PlayableEpisode, SourcesResult};
+use crate::types::{AnimeCard, PlayableEpisode, SourcesResult};
 use rusqlite::params;
 use tauri::State;
 
@@ -227,48 +227,70 @@ pub async fn resume_point(db: State<'_, Db>, anime_id: i64, episode: i64) -> Res
 #[tauri::command]
 pub async fn anime_episodes(
     db: State<'_, Db>,
+    cache: State<'_, LuciCache>,
     anime_id: i64,
     title: String,
     title_english: Option<String>,
 ) -> Result<SourcesResult, String> {
-    // Local library first — offline, private.
-    let local = crate::library::local_episodes_internal(&db, &title).await?;
-    if !local.is_empty() {
-        let episodes = local
-            .iter()
-            .map(crate::library::local_to_entry)
-            .collect::<Vec<EpisodeEntry>>();
-        return Ok(SourcesResult {
-            mal_id: 0,
-            anime_title: title,
-            episodes,
-            source: "local".into(),
-        });
-    }
-
-    crate::jikan::resolve_sources(anime_id, &title, title_english.as_deref(), Some(anime_id)).await
+    crate::streams::resolve_episode_list(&db, &cache, anime_id, &title, title_english.as_deref()).await
 }
 
-/// Resolve one playable episode URL for the player.
+/// Resolve one playable episode URL for the player, probing candidate
+/// servers in order. `exclude` skips URLs that already failed in the player.
 #[tauri::command]
 pub async fn resolve_playable(
     db: State<'_, Db>,
+    cache: State<'_, LuciCache>,
     anime_id: i64,
     title: String,
     title_english: Option<String>,
     episode: i64,
+    exclude: Option<Vec<String>>,
 ) -> Result<PlayableEpisode, String> {
-    let sources = anime_episodes(db, anime_id, title, title_english).await?;
-    let ep = sources
-        .episodes
-        .iter()
-        .find(|e| e.number == episode)
-        .ok_or_else(|| format!("episode {episode} not found"))?;
+    let r = crate::streams::resolve_playable(
+        &db,
+        &cache,
+        anime_id,
+        &title,
+        title_english.as_deref(),
+        episode,
+        exclude.unwrap_or_default(),
+    )
+    .await?;
     Ok(PlayableEpisode {
-        mal_id: sources.mal_id,
-        number: ep.number,
-        title: ep.title.clone(),
-        url: ep.url.clone(),
+        mal_id: anime_id,
+        number: r.number,
+        title: r.title,
+        url: r.url,
+        kind: r.kind.into(),
+        server: r.server,
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Providers (LuciAPI health + user-configured stream mirrors)
+// ---------------------------------------------------------------------------
+
+#[tauri::command]
+pub async fn provider_health() -> Vec<crate::providers::ProviderHealth> {
+    crate::providers::probe_all().await
+}
+
+#[tauri::command]
+pub async fn get_stream_mirrors(db: State<'_, Db>) -> Result<Vec<String>, String> {
+    Ok(crate::streams::mirror_base_urls(&db).await)
+}
+
+#[tauri::command]
+pub async fn set_stream_mirrors(db: State<'_, Db>, mirrors: Vec<String>) -> Result<(), String> {
+    let joined = mirrors.join(",");
+    db.with_conn(move |conn| {
+        conn.execute(
+            "INSERT INTO settings(key, value) VALUES ('stream_mirrors', ?1)
+             ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+            params![joined],
+        )?;
+        Ok(())
     })
 }
 
@@ -313,8 +335,3 @@ pub async fn set_setting(db: State<'_, Db>, key: String, value: String) -> Resul
         Ok(())
     })
 }
-
-// JikanCache is managed state referenced by catalog commands; keep the import
-// meaningful for tests that touch catalog types.
-#[allow(unused_imports)]
-use JikanCache as _JikanCacheImport;

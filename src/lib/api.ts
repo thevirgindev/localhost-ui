@@ -6,7 +6,9 @@ import type {
   BrowsePage,
   LocalEpisode,
   LocalItem,
+  PlayableEpisode,
   ProgressEntry,
+  ProviderHealth,
   SeasonInfo,
   SourcesResult,
   WatchlistItem,
@@ -34,6 +36,27 @@ export const api = {
       title,
       titleEnglish,
     }),
+
+  // playback resolution (server fallback chain)
+  resolveEpisode: (
+    animeId: number,
+    title: string,
+    titleEnglish: string | null,
+    episode: number,
+    exclude: string[] = [],
+  ) =>
+    invoke<PlayableEpisode>("resolve_playable", {
+      animeId,
+      title,
+      titleEnglish,
+      episode,
+      exclude,
+    }),
+
+  // providers (LuciAPI)
+  providerHealth: () => invoke<ProviderHealth[]>("provider_health"),
+  streamMirrors: () => invoke<string[]>("get_stream_mirrors"),
+  setStreamMirrors: (mirrors: string[]) => invoke<void>("set_stream_mirrors", { mirrors }),
 
   // watchlist
   addToWatchlist: (card: AnimeCard, listStatus?: string) =>

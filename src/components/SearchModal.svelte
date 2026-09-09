@@ -148,6 +148,7 @@
     role="dialog"
     aria-label="Universal Anime Search"
     tabindex="-1"
+    onkeydown={(e) => e.key === "Escape" && closeSearch()}
   >
     <!-- Card Header / Search Input -->
     <div class="search-header">
@@ -367,7 +368,7 @@
   .search-icon {
     width: 22px;
     height: 22px;
-    color: #a855f7;
+    color: var(--accent);
     flex-shrink: 0;
   }
 

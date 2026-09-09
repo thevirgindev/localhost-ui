@@ -11,8 +11,9 @@
     class="changelog-card"
     onclick={(e) => e.stopPropagation()}
     role="dialog"
-    aria-label="What's New in Crunchyroll Anime"
+    aria-label="What's New in Luci"
     tabindex="-1"
+    onkeydown={(e) => e.key === "Escape" && close()}
   >
     <div class="changelog-header">
       <div class="header-left">
@@ -114,7 +115,7 @@
   .version-tag {
     font-size: 11px;
     font-weight: 800;
-    color: #a855f7;
+    color: var(--accent);
     letter-spacing: 0.08em;
   }
 
@@ -165,7 +166,7 @@
   }
 
   .release-badge.new {
-    background: #a855f7;
+    background: var(--accent);
     color: #000000;
   }
 

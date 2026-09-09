@@ -56,6 +56,18 @@ export interface PlayableEpisode {
   number: number;
   title: string;
   url: string;
+  /** "hls" | "file" | "embed" */
+  kind: string;
+  /** Human label of the server that answered. */
+  server: string;
+}
+
+export interface ProviderHealth {
+  name: string;
+  kind: string;
+  ok: boolean;
+  latencyMs: number;
+  detail: string;
 }
 
 export interface WatchlistItem {

@@ -1,9 +1,16 @@
 use luci_lib::db::Db;
 use rusqlite::params;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+// Each test gets its own database file so parallel tests never collide.
+static DB_SEQ: AtomicU64 = AtomicU64::new(0);
 
 fn test_db() -> Db {
-    Db::open(std::env::temp_dir().join(format!("luci-test-{}.db", std::process::id())))
-        .expect("failed to open test db")
+    let n = DB_SEQ.fetch_add(1, Ordering::SeqCst);
+    Db::open(
+        std::env::temp_dir().join(format!("luci-test-{}-{n}.db", std::process::id())),
+    )
+    .expect("failed to open test db")
 }
 
 #[test]

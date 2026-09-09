@@ -4,6 +4,8 @@ pub mod db;
 mod jikan;
 mod kitsu;
 mod library;
+mod providers;
+mod streams;
 mod types;
 
 use tauri::Manager;
@@ -19,7 +21,7 @@ pub fn run() {
             let conn = db::Db::open(dir.join("luci.db"))
                 .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))?;
             app.manage(conn);
-            app.manage(catalog::JikanCache::new());
+            app.manage(catalog::LuciCache::new());
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -45,6 +47,9 @@ pub fn run() {
             commands::get_setting,
             commands::set_setting,
             commands::log_frontend_error,
+            commands::provider_health,
+            commands::get_stream_mirrors,
+            commands::set_stream_mirrors,
             library::add_library_folder,
             library::remove_library_folder,
             library::list_library_folders,

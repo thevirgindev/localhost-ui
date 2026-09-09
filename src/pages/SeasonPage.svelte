@@ -259,7 +259,7 @@
           spellcheck="false"
         />
         {#if searchQuery}
-          <button class="clear-icon" onclick={() => (searchQuery = "")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          <button class="clear-icon" aria-label="Clear search" onclick={() => (searchQuery = "")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         {/if}
       </div>
 
@@ -417,11 +417,11 @@
     font-size: 9.5px;
     font-weight: 800;
     letter-spacing: 0.06em;
-    background: rgba(168, 85, 247, 0.2);
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
     color: var(--accent);
     padding: 2px 6px;
     border-radius: 999px;
-    border: 1px solid rgba(168, 85, 247, 0.4);
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
   }
 
   .archive-toggle {
