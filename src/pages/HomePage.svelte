@@ -22,7 +22,7 @@
       const s = await api.season(info.year, info.season, 1);
 
       trending = t.slice(0, 16);
-      heroCards = t.slice(0, 5);
+      heroCards = t.slice(0, 6);
       popular = p.slice(0, 16);
       seasonal = s.slice(0, 16);
 
@@ -51,7 +51,7 @@
   {:else if error}
     <div class="page">
       <div class="error-box">
-        <span>Couldn't load the catalog: {error}</span>
+        <span>Couldn't load catalog: {error}</span>
         <button class="btn secondary" onclick={() => location.reload()}>Retry</button>
       </div>
     </div>
@@ -61,13 +61,17 @@
     <div class="page home-content">
       {#if continueItems.length > 0}
         <section class="cw-section">
-          <div class="section-title">
+          <div class="cw-header">
             <h3>Continue Watching</h3>
+            <a class="cw-history-link" href="#/library?tab=continue">
+              VIEW ALL <span class="chevron">›</span>
+            </a>
           </div>
+
           <div class="cw-grid">
-            {#each continueItems.slice(0, 8) as item (item.animeId)}
+            {#each continueItems.slice(0, 6) as item (item.animeId)}
               {@const lastEp = progressMap.get(item.animeId) ?? item.progress}
-              {@const percent = item.episodesTotal ? Math.min(100, Math.max(8, (lastEp / item.episodesTotal) * 100)) : 50}
+              {@const percent = item.episodesTotal ? Math.min(100, Math.max(10, (lastEp / item.episodesTotal) * 100)) : 45}
               <button
                 class="cw-card"
                 onclick={() => router.navigate({ name: "watch", id: item.animeId, episode: Math.max(1, lastEp) })}
@@ -78,22 +82,25 @@
                   {:else}
                     <div class="cw-noimg">▶</div>
                   {/if}
+
                   <div class="cw-hover-overlay">
-                    <span class="cw-play-circle">
-                      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                    <span class="cw-play-circle-white">
+                      <svg viewBox="0 0 24 24" fill="currentColor">
                         <path d="M8 5v14l11-7z" />
                       </svg>
                     </span>
                   </div>
+
                   <div class="cw-progress-bar">
                     <div class="cw-progress-fill" style="width: {percent}%"></div>
                   </div>
                 </div>
+
                 <div class="cw-info">
-                  <div class="cw-ep-tag">
-                    {lastEp >= (item.episodesTotal ?? Infinity) ? "COMPLETED" : `EPISODE ${Math.max(1, lastEp)}`}
+                  <div class="cw-show-title" title={item.title}>{item.title}</div>
+                  <div class="cw-ep-line">
+                    Episode {Math.max(1, lastEp)}{item.episodesTotal ? ` of ${item.episodesTotal}` : ""}
                   </div>
-                  <div class="cw-title" title={item.title}>{item.title}</div>
                 </div>
               </button>
             {/each}
@@ -106,7 +113,7 @@
       {/if}
 
       {#if seasonal.length}
-        <Row title="Simulcast Season" cards={seasonal} moreHref="#/season" />
+        <Row title="This Season" cards={seasonal} moreHref="#/season" />
       {/if}
 
       {#if popular.length}
@@ -118,7 +125,7 @@
 
 <style>
   .home-view {
-    padding-bottom: 50px;
+    padding-bottom: 60px;
   }
 
   .home-content {
@@ -126,13 +133,47 @@
   }
 
   .cw-section {
-    margin: 10px 0 32px;
+    margin: 8px 0 36px;
+  }
+
+  .cw-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .cw-header h3 {
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    color: #ffffff;
+    font-weight: 800;
+  }
+
+  .cw-history-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    transition: color 0.13s ease;
+  }
+
+  .cw-history-link:hover {
+    color: var(--accent-hover);
+  }
+
+  .chevron {
+    font-size: 16px;
+    line-height: 1;
   }
 
   .cw-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 18px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
   }
 
   .cw-card {
@@ -148,12 +189,12 @@
     border-radius: var(--radius-sm);
     overflow: hidden;
     background: var(--surface-2);
-    transition: transform 0.16s ease, box-shadow 0.16s ease;
+    transition: outline 0.12s ease;
   }
 
   .cw-card:hover .cw-thumb {
-    transform: translateY(-4px);
-    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
   }
 
   .cw-thumb img {
@@ -179,16 +220,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(13, 13, 13, 0.4);
+    background: rgba(0, 0, 0, 0.45);
     opacity: 0;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.14s ease;
   }
 
   .cw-card:hover .cw-hover-overlay {
     opacity: 1;
   }
 
-  .cw-play-circle {
+  .cw-play-circle-white {
     width: 44px;
     height: 44px;
     border-radius: 50%;
@@ -197,7 +238,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+
+  .cw-play-circle-white svg {
+    width: 18px;
+    height: 18px;
+    margin-left: 2px;
   }
 
   .cw-progress-bar {
@@ -206,7 +252,7 @@
     left: 0;
     right: 0;
     height: 4px;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.7);
   }
 
   .cw-progress-fill {
@@ -215,28 +261,27 @@
   }
 
   .cw-info {
-    padding: 10px 2px 0;
+    padding: 8px 1px 0;
   }
 
-  .cw-ep-tag {
-    font-size: 11px;
-    font-weight: 800;
-    color: var(--accent);
-    letter-spacing: 0.12em;
-    margin-bottom: 3px;
-  }
-
-  .cw-title {
+  .cw-show-title {
     font-size: 14px;
     font-weight: 700;
-    color: var(--text);
+    color: #ffffff;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: color 0.12s ease;
+    letter-spacing: -0.01em;
+    margin-bottom: 2px;
   }
 
-  .cw-card:hover .cw-title {
-    color: var(--accent-hover);
+  .cw-ep-line {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+  }
+
+  .cw-card:hover .cw-show-title {
+    color: var(--accent);
   }
 </style>

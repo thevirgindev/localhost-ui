@@ -10,31 +10,37 @@
     "Music", "Mystery", "Psychological", "Romance", "Sci-Fi", "Slice of Life",
     "Sports", "Supernatural", "Thriller",
   ];
+
+  const SORTS = [
+    { value: "POPULARITY_DESC", label: "Popular" },
+    { value: "START_DATE_DESC", label: "Newest" },
+    { value: "SCORE_DESC", label: "Top Rated" },
+    { value: "FAVOURITES_DESC", label: "Favorites" },
+  ];
+
   const FORMATS = [
+    { value: "", label: "All Formats" },
     { value: "TV", label: "Series" },
     { value: "MOVIE", label: "Movie" },
     { value: "ONA", label: "ONA" },
     { value: "OVA", label: "OVA" },
     { value: "SPECIAL", label: "Special" },
   ];
+
   const STATUSES = [
-    { value: "RELEASING", label: "Airing" },
-    { value: "FINISHED", label: "Complete" },
+    { value: "", label: "All Statuses" },
+    { value: "RELEASING", label: "Currently Airing" },
+    { value: "FINISHED", label: "Completed" },
     { value: "NOT_YET_RELEASED", label: "Upcoming" },
-  ];
-  const SORTS = [
-    { value: "POPULARITY_DESC", label: "Popularity" },
-    { value: "SCORE_DESC", label: "Score" },
-    { value: "START_DATE_DESC", label: "Newest" },
-    { value: "FAVOURITES_DESC", label: "Favorites" },
   ];
 
   let query = $state("");
-  let genres: string[] = $state([]);
+  let selectedGenre = $state("");
   let format = $state("");
   let status = $state("");
   let sort = $state("POPULARITY_DESC");
   let year = $state<number | "">("");
+  let gridLayout = $state<"2x2" | "4x4" | "dense">("4x4");
 
   let cards: AnimeCard[] = $state([]);
   let page = $state(1);
@@ -44,7 +50,6 @@
   let error = $state("");
   let sentinel: HTMLDivElement | undefined = $state();
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-  let lastQuery = $state("");
 
   onMount(() => {
     readHashQuery();
@@ -58,7 +63,7 @@
     if (q) {
       const params = new URLSearchParams(q);
       const queryParam = params.get("q");
-      if (queryParam && queryParam !== query) {
+      if (queryParam !== null && queryParam !== query) {
         query = queryParam;
         load(true);
       }
@@ -73,7 +78,7 @@
       const p = reset ? 1 : page + 1;
       const result = await api.browse({
         search: query.trim() || null,
-        genres: genres.length ? genres : null,
+        genres: selectedGenre ? [selectedGenre] : null,
         format: format || null,
         status: status || null,
         sort,
@@ -84,7 +89,6 @@
       page = p;
       hasNext = result.hasNextPage;
       firstLoad = false;
-      lastQuery = query;
     } catch (e) {
       error = String(e);
       reportError("BrowsePage.load", e);
@@ -95,34 +99,27 @@
 
   function onSearchInput() {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => load(true), 500);
+    debounceTimer = setTimeout(() => load(true), 400);
   }
 
-  function toggleGenre(g: string) {
-    genres = genres.includes(g) ? genres.filter((x) => x !== g) : [...genres, g];
+  function clearSearch() {
+    query = "";
     load(true);
   }
 
-  function toggleFormat(f: string) {
-    format = format === f ? "" : f;
+  function clearAllFilters() {
+    query = "";
+    selectedGenre = "";
+    format = "";
+    status = "";
+    year = "";
+    sort = "POPULARITY_DESC";
     load(true);
   }
 
-  function toggleStatus(s: string) {
-    status = status === s ? "" : s;
-    load(true);
-  }
-
-  function setYear(e: Event) {
-    const v = (e.target as HTMLSelectElement).value;
-    year = v === "" ? "" : Number(v);
-    load(true);
-  }
-
-  function setSort(e: Event) {
-    sort = (e.target as HTMLSelectElement).value;
-    load(true);
-  }
+  const hasActiveFilters = $derived(
+    query.trim() !== "" || selectedGenre !== "" || format !== "" || status !== "" || year !== "",
+  );
 
   $effect(() => {
     if (sentinel && hasNext && !loading) {
@@ -139,14 +136,34 @@
 </script>
 
 <div class="page">
-  <div class="browse-header">
-    <h1 class="page-title">{query.trim() ? `Results for “${lastQuery || query.trim()}”` : "Browse All"}</h1>
-    <p class="page-sub">{firstLoad ? "Loading catalog…" : `${cards.length}${hasNext ? "+" : ""} series`}</p>
+  <div class="explore-top">
+    <div>
+      <h1 class="page-title">Explore</h1>
+    </div>
+
+    <!-- Crunchyroll-style segmented sorting tabs -->
+    <div class="sort-tabs">
+      {#each SORTS as s}
+        <button
+          class="sort-tab"
+          class:active={sort === s.value}
+          onclick={() => {
+            if (sort !== s.value) {
+              sort = s.value;
+              load(true);
+            }
+          }}
+        >
+          {s.label}
+        </button>
+      {/each}
+    </div>
   </div>
 
-  <div class="filter-bar">
-    <div class="search-wrap">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="search-icon">
+  <!-- Clean, unified filter bar -->
+  <div class="filter-toolbar">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="s-icon">
         <circle cx="11" cy="11" r="8" />
         <line x1="21" y1="21" x2="16.65" y2="16.65" />
       </svg>
@@ -154,48 +171,127 @@
         class="search-input"
         bind:value={query}
         oninput={onSearchInput}
-        placeholder="Filter by title…"
+        placeholder="Filter by title..."
         spellcheck="false"
       />
+      {#if query}
+        <button class="clear-btn" onclick={clearSearch} title="Clear search">✕</button>
+      {/if}
     </div>
 
-    <div class="selects-wrap">
-      <select class="pill-select" onchange={setYear} value={String(year)}>
-        <option value="">Any Year</option>
+    <div class="selects-group">
+      <!-- Genre Select -->
+      <select
+        class="filter-select"
+        class:highlighted={selectedGenre !== ""}
+        bind:value={selectedGenre}
+        onchange={() => load(true)}
+      >
+        <option value="">All Genres</option>
+        {#each GENRES as g}
+          <option value={g}>{g}</option>
+        {/each}
+      </select>
+
+      <!-- Format Select -->
+      <select
+        class="filter-select"
+        class:highlighted={format !== ""}
+        bind:value={format}
+        onchange={() => load(true)}
+      >
+        {#each FORMATS as f}
+          <option value={f.value}>{f.label}</option>
+        {/each}
+      </select>
+
+      <!-- Status Select -->
+      <select
+        class="filter-select"
+        class:highlighted={status !== ""}
+        bind:value={status}
+        onchange={() => load(true)}
+      >
+        {#each STATUSES as st}
+          <option value={st.value}>{st.label}</option>
+        {/each}
+      </select>
+
+      <!-- Year Select -->
+      <select
+        class="filter-select"
+        class:highlighted={year !== ""}
+        bind:value={year}
+        onchange={() => load(true)}
+      >
+        <option value="">All Years</option>
         {#each Array.from({ length: 36 }, (_, i) => new Date().getFullYear() + 1 - i) as y}
-          <option value={String(y)}>{y}</option>
+          <option value={y}>{y}</option>
         {/each}
       </select>
 
-      <select class="pill-select" onchange={setSort} value={sort}>
-        {#each SORTS as s}
-          <option value={s.value}>{s.label}</option>
-        {/each}
-      </select>
+      <!-- Grid density picker: 2x2 / 4x4 / Dense -->
+      <div class="grid-density-picker">
+        <button
+          class="density-btn"
+          class:active={gridLayout === "2x2"}
+          onclick={() => (gridLayout = "2x2")}
+          title="2x2 Large Showcase Grid"
+        >
+          2×2
+        </button>
+        <button
+          class="density-btn"
+          class:active={gridLayout === "4x4"}
+          onclick={() => (gridLayout = "4x4")}
+          title="4x4 Standard Catalog Grid"
+        >
+          4×4
+        </button>
+        <button
+          class="density-btn"
+          class:active={gridLayout === "dense"}
+          onclick={() => (gridLayout = "dense")}
+          title="Dense Dynamic Grid"
+        >
+          Dense
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="chip-row">
-    {#each FORMATS as f}
-      <button class="chip" class:active={format === f.value} onclick={() => toggleFormat(f.value)}>
-        {f.label}
-      </button>
-    {/each}
-    <span class="chip-divider"></span>
-    {#each STATUSES as s}
-      <button class="chip" class:active={status === s.value} onclick={() => toggleStatus(s.value)}>
-        {s.label}
-      </button>
-    {/each}
-  </div>
-
-  <div class="chip-row genres-row">
-    {#each GENRES as g}
-      <button class="chip" class:active={genres.includes(g)} onclick={() => toggleGenre(g)}>
-        {g}
-      </button>
-    {/each}
-  </div>
+  <!-- Active filter badges (only shown when filtered) -->
+  {#if hasActiveFilters}
+    <div class="active-filters-row">
+      <span class="active-label">Filters:</span>
+      {#if query.trim()}
+        <button class="active-tag" onclick={clearSearch}>
+          "{query.trim()}" ✕
+        </button>
+      {/if}
+      {#if selectedGenre}
+        <button class="active-tag" onclick={() => { selectedGenre = ""; load(true); }}>
+          Genre: {selectedGenre} ✕
+        </button>
+      {/if}
+      {#if format}
+        <button class="active-tag" onclick={() => { format = ""; load(true); }}>
+          Format: {FORMATS.find((f) => f.value === format)?.label} ✕
+        </button>
+      {/if}
+      {#if status}
+        <button class="active-tag" onclick={() => { status = ""; load(true); }}>
+          Status: {STATUSES.find((s) => s.value === status)?.label} ✕
+        </button>
+      {/if}
+      {#if year !== ""}
+        <button class="active-tag" onclick={() => { year = ""; load(true); }}>
+          Year: {year} ✕
+        </button>
+      {/if}
+      <button class="clear-all-btn" onclick={clearAllFilters}>Clear all</button>
+    </div>
+  {/if}
 
   {#if error}
     <div class="error-box">
@@ -207,7 +303,7 @@
   {#if firstLoad && loading}
     <div class="spinner"></div>
   {:else}
-    <div class="grid">
+    <div class="grid layout-{gridLayout}">
       {#each cards as card (card.id)}
         <AnimeCardItem {card} />
       {/each}
@@ -216,8 +312,8 @@
     {#if !loading && cards.length === 0}
       <div class="empty-state">
         <div class="big">∅</div>
-        <p>No anime found matching your filters.</p>
-        <p class="hint">Try removing some genres or searching with a different term.</p>
+        <p>No titles found matching those criteria.</p>
+        <button class="btn secondary" style="margin-top: 14px;" onclick={clearAllFilters}>Reset Filters</button>
       </div>
     {/if}
 
@@ -232,25 +328,58 @@
 </div>
 
 <style>
-  .browse-header {
-    margin-bottom: 8px;
+  .explore-top {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
   }
 
-  .filter-bar {
+  .sort-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 3px;
+    border-radius: 999px;
+  }
+
+  .sort-tab {
+    padding: 7px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-dim);
+    transition: all 0.13s ease;
+  }
+
+  .sort-tab:hover {
+    color: var(--text);
+  }
+
+  .sort-tab.active {
+    background: var(--accent);
+    color: #0d0d0d;
+    font-weight: 700;
+  }
+
+  .filter-toolbar {
     display: flex;
     gap: 12px;
-    margin-bottom: 18px;
+    margin-bottom: 16px;
     align-items: center;
     flex-wrap: wrap;
   }
 
-  .search-wrap {
+  .search-box {
     position: relative;
     flex: 1;
     min-width: 260px;
   }
 
-  .search-icon {
+  .s-icon {
     position: absolute;
     left: 14px;
     top: 50%;
@@ -263,54 +392,176 @@
 
   .search-input {
     width: 100%;
-    padding: 10px 18px 10px 40px;
-    border-radius: 999px;
-    background: var(--surface-2);
+    padding: 10px 38px 10px 40px;
+    border-radius: 4px;
+    background: var(--surface);
     border: 1px solid var(--border);
     font-size: 13.5px;
+    color: var(--text);
   }
 
   .search-input:focus {
     border-color: var(--accent);
-    background: var(--surface-3);
+    background: var(--surface-2);
   }
 
-  .selects-wrap {
+  .clear-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
     display: flex;
-    gap: 10px;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-dim);
+    font-size: 11px;
+    border-radius: 4px;
   }
 
-  .pill-select {
+  .clear-btn:hover {
+    color: var(--text);
+  }
+
+  .selects-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .filter-select {
+    border-radius: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 9px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .filter-select:focus {
+    border-color: var(--accent);
+  }
+
+  .filter-select.highlighted {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .grid-density-picker {
+    display: flex;
+    align-items: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .density-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 3px;
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+
+  .density-btn:hover {
+    color: #ffffff;
+  }
+
+  .density-btn.active {
+    background: var(--accent);
+    color: #0d0d0d;
+    font-weight: 800;
+  }
+
+  /* Grid layouts */
+  .grid.layout-2x2 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 36px 28px;
+  }
+
+  .grid.layout-4x4 {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 28px 20px;
+  }
+
+  .grid.layout-dense {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    gap: 24px 16px;
+  }
+
+  @media (max-width: 1200px) {
+    .grid.layout-4x4 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 768px) {
+    .grid.layout-2x2,
+    .grid.layout-4x4 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .active-filters-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    padding-top: 4px;
+  }
+
+  .active-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-faint);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .active-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
     border-radius: 999px;
     background: var(--surface-2);
     border: 1px solid var(--border);
-    padding: 9px 18px;
-    font-size: 13px;
-    font-weight: 600;
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.12s ease;
   }
 
-  .pill-select:focus {
+  .active-tag:hover {
     border-color: var(--accent);
     background: var(--surface-3);
   }
 
-  .chip-row {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 12px;
+  .clear-all-btn {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-faint);
+    margin-left: 4px;
+    text-decoration: underline;
+    cursor: pointer;
   }
 
-  .genres-row {
-    margin-bottom: 28px;
-  }
-
-  .chip-divider {
-    width: 1px;
-    background: var(--border);
-    margin: 2px 6px;
-    height: 24px;
-    align-self: center;
+  .clear-all-btn:hover {
+    color: var(--accent);
   }
 
   .sentinel {
@@ -318,7 +569,7 @@
   }
 
   .spinner.small {
-    margin: 24px auto;
+    margin: 20px auto;
     width: 28px;
     height: 28px;
   }

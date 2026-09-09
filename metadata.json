@@ -1,6 +1,6 @@
 {
-  "name": "localhost",
-  "description": "Crunchyroll-styled anime streaming and catalog client.",
+  "name": "Luci",
+  "description": "Luci - High-performance anime streaming and discovery desktop client featuring customizable themes, episode tracking, and local profiles.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

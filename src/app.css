@@ -10,27 +10,93 @@
 }
 
 :root {
-  --bg: #0d0d0d;
-  --bg-raise: #141519;
-  --surface: #141519;
-  --surface-2: #23252b;
-  --surface-3: #2d3037;
-  --border: #23252b;
-  --border-soft: #23252b;
+  --bg: #0c0d10;
+  --bg-raise: #13151b;
+  --surface: #14161c;
+  --surface-2: #1e2129;
+  --surface-3: #2a2e39;
+  --border: #222631;
+  --border-soft: #1a1d26;
   --text: #ffffff;
-  --text-dim: #a0a0a0;
-  --text-faint: #727278;
+  --text-dim: #9ba1b0;
+  --text-faint: #676c7b;
   --accent: #f47521;
   --accent-hover: #ff8533;
   --accent-dim: rgba(244, 117, 33, 0.14);
   --green: #2ecc71;
-  --radius: 8px;
+  --radius: 6px;
   --radius-sm: 4px;
-  --radius-lg: 12px;
-  --nav-h: 60px;
+  --radius-lg: 10px;
+  --nav-h: 64px;
   --shadow: 0 10px 32px rgba(0, 0, 0, 0.65);
-  --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font: "Overpass", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
+}
+
+[data-theme="oled"] {
+  --bg: #000000;
+  --bg-raise: #08080a;
+  --surface: #0a0a0d;
+  --surface-2: #121318;
+  --surface-3: #1a1b22;
+  --border: #181920;
+  --border-soft: #121318;
+  --text: #ffffff;
+  --text-dim: #9094a2;
+  --text-faint: #595d6a;
+}
+
+[data-theme="charcoal"] {
+  --bg: #12161c;
+  --bg-raise: #181e26;
+  --surface: #181e26;
+  --surface-2: #212a36;
+  --surface-3: #2d3847;
+  --border: #263242;
+  --border-soft: #1e2733;
+  --text: #ffffff;
+  --text-dim: #9cb1c9;
+  --text-faint: #65778e;
+}
+
+[data-theme="light"] {
+  --bg: #f5f6fa;
+  --bg-raise: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #eaedf4;
+  --surface-3: #dde2ed;
+  --border: #d6dbe7;
+  --border-soft: #e3e7f0;
+  --text: #0d1117;
+  --text-dim: #576071;
+  --text-faint: #8a93a3;
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="navy"] {
+  --bg: #0b101b;
+  --bg-raise: #111726;
+  --surface: #121929;
+  --surface-2: #1b253b;
+  --surface-3: #26334f;
+  --border: #222e47;
+  --border-soft: #172033;
+  --text: #ffffff;
+  --text-dim: #9fb3cf;
+  --text-faint: #657796;
+}
+
+[data-theme="cyber"] {
+  --bg: #07090e;
+  --bg-raise: #0e121c;
+  --surface: #0f1420;
+  --surface-2: #182033;
+  --surface-3: #232f4a;
+  --border: #273452;
+  --border-soft: #172033;
+  --text: #ffffff;
+  --text-dim: #90a5c7;
+  --text-faint: #5a6e8c;
 }
 
 * {
@@ -51,10 +117,23 @@ body {
   text-rendering: optimizeLegibility;
   overflow: hidden;
   user-select: none;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 #app {
   height: 100vh;
+}
+
+/* Hide default OS scrollbars while preserving full scrollability */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 h1, h2, h3, h4 {
@@ -125,7 +204,7 @@ img {
   background: #3d414a;
 }
 
-/* ---------- CR pill buttons ---------- */
+/* ---------- Luci buttons & chips ---------- */
 
 .btn {
   display: inline-flex;
@@ -133,7 +212,7 @@ img {
   justify-content: center;
   gap: 8px;
   padding: 10px 22px;
-  border-radius: 999px;
+  border-radius: var(--radius-btn, var(--radius-sm, 4px));
   font-size: 13.5px;
   font-weight: 700;
   transition: background 0.14s ease, color 0.14s ease, transform 0.1s ease;
@@ -202,14 +281,14 @@ img {
   cursor: not-allowed;
 }
 
-/* ---------- CR filter chips (pill-shaped, white on active) ---------- */
+/* ---------- Filter chips ---------- */
 
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 7px 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-sm, 4px);
   background: var(--surface-2);
   font-size: 13px;
   font-weight: 600;
@@ -234,21 +313,26 @@ img {
 /* ---------- page scaffolding ---------- */
 
 .page {
-  padding: 24px 44px 64px;
+  padding: calc(var(--nav-h) + 20px) 48px 72px;
   max-width: 1560px;
   margin: 0 auto;
 }
 
+.page.hero-page {
+  padding-top: 0;
+}
+
 .page-title {
-  font-size: 26px;
-  margin-bottom: 4px;
-  letter-spacing: -0.02em;
+  font-size: 28px;
+  margin-bottom: 6px;
+  letter-spacing: -0.025em;
+  font-weight: 800;
 }
 
 .page-sub {
   color: var(--text-faint);
-  margin: 0 0 22px;
-  font-size: 13px;
+  margin: 0 0 24px;
+  font-size: 13.5px;
 }
 
 .section-title {
@@ -283,13 +367,15 @@ img {
 }
 
 .spinner {
-  width: 38px;
-  height: 38px;
-  border: 3px solid var(--surface-2);
-  border-top-color: var(--accent);
+  width: 44px;
+  height: 44px;
+  border: 3.5px solid rgba(244, 117, 33, 0.08);
+  border-top-color: #f47521;
+  border-right-color: rgba(244, 117, 33, 0.85);
   border-radius: 50%;
-  animation: spin 0.75s linear infinite;
-  margin: 70px auto;
+  animation: spin 0.75s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
+  margin: 100px auto;
+  box-shadow: 0 0 16px rgba(244, 117, 33, 0.2);
 }
 
 @keyframes spin {

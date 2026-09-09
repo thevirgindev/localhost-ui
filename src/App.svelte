@@ -1,11 +1,16 @@
 <script lang="ts">
   import { router, type Route } from "./lib/router";
+  import { userStore } from "./lib/userStore.svelte";
   import Navbar from "./components/Navbar.svelte";
+  import Footer from "./components/Footer.svelte";
+  import SearchModal from "./components/SearchModal.svelte";
+  import ProfileModal from "./components/ProfileModal.svelte";
+  import ChangelogModal from "./components/ChangelogModal.svelte";
+  import ContextMenu from "./components/ContextMenu.svelte";
   import HomePage from "./pages/HomePage.svelte";
   import BrowsePage from "./pages/BrowsePage.svelte";
   import SeasonPage from "./pages/SeasonPage.svelte";
   import DetailsPage from "./pages/DetailsPage.svelte";
-  import ListPage from "./pages/ListPage.svelte";
   import LibraryPage from "./pages/LibraryPage.svelte";
   import SettingsPage from "./pages/SettingsPage.svelte";
   import WatchPage from "./pages/WatchPage.svelte";
@@ -30,27 +35,51 @@
         <SeasonPage />
       {:else if route.name === "details"}
         <DetailsPage id={route.id} />
-      {:else if route.name === "list"}
-        <ListPage />
-      {:else if route.name === "library"}
+      {:else if route.name === "list" || route.name === "library"}
         <LibraryPage />
       {:else if route.name === "settings"}
         <SettingsPage />
+      {/if}
+
+      {#if route.name !== "settings"}
+        <Footer />
       {/if}
     </div>
   </div>
 {/if}
 
+<!-- Modals & Overlays -->
+{#if userStore.showSearchModal}
+  <SearchModal />
+{/if}
+
+{#if userStore.showProfileModal}
+  <ProfileModal />
+{/if}
+
+{#if userStore.showChangelogModal}
+  <ChangelogModal />
+{/if}
+
+{#if userStore.showSettingsModal && route.name !== "settings"}
+  <SettingsPage />
+{/if}
+
+<!-- Global Desktop Context Menu -->
+<ContextMenu />
+
 <style>
   .shell {
-    display: flex;
-    flex-direction: column;
+    position: relative;
     height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
   }
 
   .content {
-    flex: 1;
+    height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
+    scroll-behavior: smooth;
   }
 </style>

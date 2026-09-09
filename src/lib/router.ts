@@ -14,25 +14,37 @@ export type Route =
   | { name: "settings" };
 
 function parseHash(): Route {
-  const hash = window.location.hash.replace(/^#/, "") || "/";
-  const parts = hash.split("/").filter(Boolean);
+  const raw = window.location.hash.replace(/^#\/?/, "") || "";
+  const [pathPart, queryPart] = raw.split("?");
+  const queryParams = new URLSearchParams(queryPart || "");
+  const parts = pathPart.split("/").filter(Boolean);
 
-  switch (parts[0]) {
-    case undefined:
+  const first = (parts[0] || "").toLowerCase();
+
+  switch (first) {
     case "":
+    case "home":
       return { name: "home" };
     case "browse":
       return { name: "browse" };
     case "season":
+    case "seasons":
       return { name: "season" };
     case "anime":
-      return { name: "details", id: Number(parts[1]) || 0 };
+    case "details": {
+      const idFromQuery = Number(queryParams.get("id"));
+      const idFromPath = Number(parts[1]);
+      return { name: "details", id: idFromQuery || idFromPath || 0 };
+    }
     case "watch":
       return { name: "watch", id: Number(parts[1]) || 0, episode: Number(parts[2]) || 1 };
     case "list":
-      return { name: "list" };
+    case "lists":
+    case "mylists":
+    case "my-lists":
+    case "watchlist":
     case "library":
-      return { name: "library" };
+      return { name: "list" };
     case "settings":
       return { name: "settings" };
     default:
