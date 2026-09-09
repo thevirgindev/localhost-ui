@@ -77,6 +77,7 @@
   }
 
   .content {
+    position: relative;
     height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;

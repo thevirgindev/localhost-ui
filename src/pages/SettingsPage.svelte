@@ -19,7 +19,7 @@
 
   // Appearance reactive bindings
   let currentTheme = $state<AppPreferences["theme"]>(userStore.preferences.theme || "dark");
-  let accentColor = $state(userStore.preferences.accentColor || "#f47521");
+  let accentColor = $state(userStore.preferences.accentColor || "#a855f7");
   let radius = $state(userStore.preferences.radius || "4");
   let fontFamily = $state(userStore.preferences.fontFamily || "Overpass");
   let cardStyle = $state<AppPreferences["cardStyle"]>(userStore.preferences.cardStyle || "bordered");
@@ -233,7 +233,7 @@
           class:active={activeTab === "account"}
           onclick={() => (activeTab = "account")}
         >
-          <span class="tab-icon">👤</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg></span>
           <span>My Account</span>
         </button>
         <button
@@ -241,7 +241,7 @@
           class:active={activeTab === "profiles"}
           onclick={() => (activeTab = "profiles")}
         >
-          <span class="tab-icon">👥</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></span>
           <span>Profiles</span>
           <span class="active-badge">{userStore.profiles.length}</span>
         </button>
@@ -255,7 +255,7 @@
           class:active={activeTab === "appearance"}
           onclick={() => (activeTab = "appearance")}
         >
-          <span class="tab-icon">🎨</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" /><circle cx="17.5" cy="10.5" r=".5" /><circle cx="8.5" cy="7.5" r=".5" /><circle cx="6.5" cy="12.5" r=".5" /><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" /></svg></span>
           <span>Appearance & Theme</span>
         </button>
         <button
@@ -263,7 +263,7 @@
           class:active={activeTab === "playback"}
           onclick={() => (activeTab = "playback")}
         >
-          <span class="tab-icon">🎬</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polygon points="10 8 16 12 10 16 10 8" /></svg></span>
           <span>Video & Playback</span>
         </button>
         <button
@@ -271,7 +271,7 @@
           class:active={activeTab === "subtitles"}
           onclick={() => (activeTab = "subtitles")}
         >
-          <span class="tab-icon">💬</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg></span>
           <span>Audio & Subtitles</span>
         </button>
         <button
@@ -279,7 +279,7 @@
           class:active={activeTab === "notifications"}
           onclick={() => (activeTab = "notifications")}
         >
-          <span class="tab-icon">🔔</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" /><path d="M13.73 21a2 2 0 0 1-3.46 0" /></svg></span>
           <span>Airing Alerts</span>
           {#if userStore.unreadNotificationsCount > 0}
             <span class="unread-pill">{userStore.unreadNotificationsCount}</span>
@@ -290,7 +290,7 @@
           class:active={activeTab === "keybinds"}
           onclick={() => (activeTab = "keybinds")}
         >
-          <span class="tab-icon">⌨️</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M8 16h8" /></svg></span>
           <span>Keybinds</span>
         </button>
 
@@ -303,7 +303,7 @@
           class:active={activeTab === "data"}
           onclick={() => (activeTab = "data")}
         >
-          <span class="tab-icon">💾</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg></span>
           <span>Storage & Cache</span>
         </button>
         <button
@@ -311,7 +311,7 @@
           class:active={activeTab === "about"}
           onclick={() => (activeTab = "about")}
         >
-          <span class="tab-icon">ℹ️</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" /></svg></span>
           <span>About Luci</span>
         </button>
 
@@ -324,7 +324,7 @@
             closeSettings();
           }}
         >
-          <span class="tab-icon">🚪</span>
+          <span class="tab-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg></span>
           <span>Log Out</span>
         </button>
       </div>
@@ -335,7 +335,7 @@
       <!-- Discord Close Button at Top Right with 1:1 circular highlight -->
       <div class="discord-close-col">
         <button class="discord-esc-btn" onclick={closeSettings} title="Close Settings (ESC)">
-          <div class="esc-circle">✕</div>
+          <div class="esc-circle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></div>
           <span class="esc-label">ESC</span>
         </button>
       </div>
@@ -343,7 +343,7 @@
       <div class="content-scroll">
         {#if statusMessage}
           <div class="status-banner">
-            <span>✓ {statusMessage}</span>
+            <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="13" height="13" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> {statusMessage}</span>
           </div>
         {/if}
 
@@ -534,7 +534,7 @@
                       title="Delete custom preset"
                       onclick={() => userStore.deleteCustomPreset(cp.id)}
                     >
-                      ✕
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </button>
                   </div>
                 {/each}
@@ -630,7 +630,7 @@
               <div class="group-title">Accent Color</div>
               <div class="color-picker-grid">
                 {#each [
-                  { label: "Luci Orange", hex: "#f47521" },
+                  { label: "Luci Orange", hex: "#a855f7" },
                   { label: "Electric Cyan", hex: "#00d2ff" },
                   { label: "Emerald Jade", hex: "#10b981" },
                   { label: "Neon Violet", hex: "#8b5cf6" },
@@ -664,7 +664,7 @@
                   bind:value={accentColor}
                   onchange={() => setAccentColor(accentColor)}
                   class="color-hex-text"
-                  placeholder="#f47521"
+                  placeholder="#a855f7"
                 />
               </div>
             </div>
@@ -1087,7 +1087,7 @@
   .nav-tab.active {
     background: var(--surface-3, #23252f);
     color: var(--text, #ffffff);
-    border-left: 3px solid var(--accent, #f47521);
+    border-left: 3px solid var(--accent, #a855f7);
   }
 
   .nav-tab.logout {
@@ -1118,7 +1118,7 @@
   }
 
   .unread-pill {
-    background: var(--accent, #f47521);
+    background: var(--accent, #a855f7);
     color: #000000;
   }
 
@@ -1283,7 +1283,7 @@
   }
 
   .preset-input:focus {
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
   }
 
   /* Presets Grid */
@@ -1310,13 +1310,13 @@
 
   .preset-card:hover {
     background: var(--surface-3, #20232e);
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
   }
 
   .preset-card.active {
     background: var(--surface-3, #222634);
-    border-color: var(--accent, #f47521);
-    box-shadow: 0 0 0 1px var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
+    box-shadow: 0 0 0 1px var(--accent, #a855f7);
   }
 
   .custom-preset-card {
@@ -1371,7 +1371,7 @@
 
   .custom-badge {
     font-size: 9px;
-    background: var(--accent, #f47521);
+    background: var(--accent, #a855f7);
     color: #000000;
     font-weight: 900;
     padding: 1px 4px;
@@ -1407,13 +1407,13 @@
 
   .radio-card:hover {
     background: var(--surface-3, #21232d);
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
   }
 
   .radio-card.active {
     background: var(--surface-3, #222530);
-    border-color: var(--accent, #f47521);
-    box-shadow: 0 0 0 1px var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
+    box-shadow: 0 0 0 1px var(--accent, #a855f7);
   }
 
   .theme-preview-box {
@@ -1512,13 +1512,13 @@
 
   .color-btn:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
   }
 
   .color-btn.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
-    box-shadow: 0 0 0 1px var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
+    box-shadow: 0 0 0 1px var(--accent, #a855f7);
   }
 
   .color-swatch {
@@ -1594,20 +1594,20 @@
 
   .radius-option-card:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
   }
 
   .radius-option-card.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
-    box-shadow: 0 0 0 1px var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
+    box-shadow: 0 0 0 1px var(--accent, #a855f7);
   }
 
   .radius-sample-box {
     width: 38px;
     height: 38px;
-    border: 2px solid var(--accent, #f47521);
-    background: rgba(244, 117, 33, 0.12);
+    border: 2px solid var(--accent, #a855f7);
+    background: rgba(168, 85, 247, 0.12);
     margin-bottom: 4px;
   }
 
@@ -1642,19 +1642,19 @@
 
   .font-option-card:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
   }
 
   .font-option-card.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
-    box-shadow: 0 0 0 1px var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
+    box-shadow: 0 0 0 1px var(--accent, #a855f7);
   }
 
   .font-sample {
     font-size: 24px;
     font-weight: 800;
-    color: var(--accent, #f47521);
+    color: var(--accent, #a855f7);
     margin-bottom: 6px;
   }
 
@@ -1692,13 +1692,13 @@
 
   .card-opt-btn:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
   }
 
   .card-opt-btn.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
-    box-shadow: 0 0 0 1px var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
+    box-shadow: 0 0 0 1px var(--accent, #a855f7);
   }
 
   .card-opt-title {
@@ -1865,7 +1865,7 @@
   }
 
   .profile-row.current {
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
     background: var(--surface-3, #1e212b);
   }
 
@@ -1894,7 +1894,7 @@
   .active-tag {
     font-size: 9.5px;
     font-weight: 900;
-    background: var(--accent, #f47521);
+    background: var(--accent, #a855f7);
     color: #000000;
     padding: 2px 6px;
     border-radius: 2px;
@@ -1957,7 +1957,7 @@
   .toggle-switch {
     width: 20px;
     height: 20px;
-    accent-color: var(--accent, #f47521);
+    accent-color: var(--accent, #a855f7);
     cursor: pointer;
   }
 
@@ -2050,7 +2050,7 @@
   .about-logo-text {
     font-size: 28px;
     font-weight: 900;
-    color: var(--accent, #f47521);
+    color: var(--accent, #a855f7);
     letter-spacing: -0.03em;
   }
 
@@ -2146,7 +2146,7 @@
   }
 
   .save-btn {
-    background: var(--accent, #f47521) !important;
+    background: var(--accent, #a855f7) !important;
     color: #000000 !important;
   }
 
@@ -2170,13 +2170,13 @@
 
   .quality-card:hover {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
   }
 
   .quality-card.active {
     background: var(--surface-3, #22242e);
-    border-color: var(--accent, #f47521);
-    box-shadow: 0 0 0 1px var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
+    box-shadow: 0 0 0 1px var(--accent, #a855f7);
   }
 
   .q-title {
@@ -2220,7 +2220,7 @@
   .lang-pill.active {
     background: var(--surface-3, #22242e);
     color: var(--text, #ffffff);
-    border-color: var(--accent, #f47521);
+    border-color: var(--accent, #a855f7);
   }
 
   .subtitle-customizer-grid {

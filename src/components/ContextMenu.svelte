@@ -335,11 +335,11 @@
 
       <button class="menu-item" onclick={toggleAnimeWatchlist} role="menuitem">
         {#if animeCtx.isWatchlisted}
-          <svg viewBox="0 0 24 24" fill="#f47521" class="item-icon">
+          <svg viewBox="0 0 24 24" fill="#a855f7" class="item-icon">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
           </svg>
           <span class="item-label">In Watchlist</span>
-          <span class="item-shortcut active-sub">✓ Saved</span>
+          <span class="item-shortcut active-sub"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="11" height="11" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Saved</span>
         {:else}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="item-icon">
             <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" />
@@ -577,7 +577,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.08em;
-    color: #f47521;
+    color: #a855f7;
   }
 
   .header-title {
@@ -625,25 +625,25 @@
   }
 
   .menu-item.primary {
-    color: #f47521;
+    color: #a855f7;
     font-weight: 700;
   }
 
   .menu-item.primary:hover {
-    background: rgba(244, 117, 33, 0.16);
-    color: #ff8533;
+    background: rgba(168, 85, 247, 0.16);
+    color: #c084fc;
   }
 
   .highlight-search {
-    background: rgba(244, 117, 33, 0.08);
+    background: rgba(168, 85, 247, 0.08);
   }
 
   .highlight-search:hover {
-    background: rgba(244, 117, 33, 0.18);
+    background: rgba(168, 85, 247, 0.18);
   }
 
   .search-color {
-    color: #f47521;
+    color: #a855f7;
   }
 
   .item-icon {
@@ -674,7 +674,7 @@
   }
 
   .item-shortcut.active-sub {
-    color: #f47521;
+    color: #a855f7;
     font-weight: 700;
   }
 
@@ -712,7 +712,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: #f47521;
+    background: #a855f7;
     flex-shrink: 0;
   }
 

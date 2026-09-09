@@ -52,8 +52,16 @@ function makeIcoPng(size) {
     return dist <= 0 ? 1 : clamp(0.5 - dist, 0, 1);
   }
   const bg = [10, 12, 16, 255];
-  const orange = [244, 117, 33, 255];
-  const white = [232, 234, 238, 255];
+  const purple = [168, 85, 247, 255];
+  const dark = [13, 13, 13, 255];
+  function diamond(cx, cy, a, b, px, py) {
+    const d = Math.abs(px - cx) / a + Math.abs(py - cy) / b;
+    return clamp((1 - d) * 40, 0, 1);
+  }
+  function circle(cx, cy, r, px, py) {
+    const d = Math.hypot(px - cx, py - cy) - r * s;
+    return clamp(0.5 - d, 0, 1);
+  }
   const raw = Buffer.alloc(size * (size * 4 + 1));
   const s = size / 1024;
   for (let py = 0; py < size; py++) {
@@ -63,14 +71,19 @@ function makeIcoPng(size) {
       const i = rowStart + 1 + px * 4;
       const outer = rrect(32 * s, 32 * s, size - 64 * s, size - 64 * s, 200 * s, px, py);
       const inner = rrect(160 * s, 160 * s, size - 320 * s, size - 320 * s, 130 * s, px, py);
-      const bar = rrect(300 * s, 560 * s, 424 * s, 120 * s, 60 * s, px, py);
+      const sparkle = Math.max(
+        diamond(512 * s, 512 * s, 95 * s, 300 * s, px, py),
+        diamond(512 * s, 512 * s, 300 * s, 95 * s, px, py),
+      );
+      const dot = circle(720 * s, 330 * s, 62, px, py);
+      const mark = Math.max(sparkle, dot);
       let r = bg[0], g = bg[1], b = bg[2], a = bg[3] * outer;
-      r = r * (1 - inner) + orange[0] * inner;
-      g = g * (1 - inner) + orange[1] * inner;
-      b = b * (1 - inner) + orange[2] * inner;
-      r = r * (1 - bar) + white[0] * bar;
-      g = g * (1 - bar) + white[1] * bar;
-      b = b * (1 - bar) + white[2] * bar;
+      r = r * (1 - inner) + purple[0] * inner;
+      g = g * (1 - inner) + purple[1] * inner;
+      b = b * (1 - inner) + purple[2] * inner;
+      r = r * (1 - mark) + dark[0] * mark;
+      g = g * (1 - mark) + dark[1] * mark;
+      b = b * (1 - mark) + dark[2] * mark;
       raw[i] = Math.round(clamp(r, 0, 255));
       raw[i + 1] = Math.round(clamp(g, 0, 255));
       raw[i + 2] = Math.round(clamp(b, 0, 255));

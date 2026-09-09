@@ -180,7 +180,7 @@
           class:active={showArchivePicker}
           onclick={() => (showArchivePicker = !showArchivePicker)}
         >
-          <span>More Seasons ▾</span>
+          <span>More Seasons <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
         </button>
       </div>
 
@@ -259,7 +259,7 @@
           spellcheck="false"
         />
         {#if searchQuery}
-          <button class="clear-icon" onclick={() => (searchQuery = "")}>✕</button>
+          <button class="clear-icon" onclick={() => (searchQuery = "")}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
         {/if}
       </div>
 
@@ -417,11 +417,11 @@
     font-size: 9.5px;
     font-weight: 800;
     letter-spacing: 0.06em;
-    background: rgba(244, 117, 33, 0.2);
+    background: rgba(168, 85, 247, 0.2);
     color: var(--accent);
     padding: 2px 6px;
     border-radius: 999px;
-    border: 1px solid rgba(244, 117, 33, 0.4);
+    border: 1px solid rgba(168, 85, 247, 0.4);
   }
 
   .archive-toggle {

@@ -51,10 +51,10 @@ export interface CustomThemePreset {
 
 const DEFAULT_PROFILES: UserProfile[] = [
   {
-    id: "p_syzder",
-    name: "Syzder",
+    id: "p_luci",
+    name: "Luci",
     avatar: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=160&auto=format&fit=crop&q=80",
-    color: "#f47521",
+    color: "#a855f7",
     isKid: false,
     createdAt: "2026-01-01",
   },
@@ -140,7 +140,7 @@ const DEFAULT_PREFS: AppPreferences = {
   subtitleSize: "medium",
   subtitleBg: "none",
   airingAlerts: true,
-  accentColor: "#ffffff",
+  accentColor: "#a855f7",
   radius: "4",
   fontFamily: "Overpass",
   cardStyle: "bordered",
@@ -153,7 +153,7 @@ export const BUILT_IN_PRESETS: CustomThemePreset[] = [
     id: "preset_luci_classic",
     name: "Luci Monochrome (Default)",
     theme: "dark",
-    accentColor: "#ffffff",
+    accentColor: "#a855f7",
     radius: "4",
     fontFamily: "Overpass",
     cardStyle: "bordered",
@@ -213,7 +213,7 @@ export function applyAppearanceToDocument(prefs: AppPreferences) {
   root.setAttribute("data-theme", prefs.theme || "dark");
 
   // Accent Colors
-  const accent = prefs.accentColor || "#f47521";
+  const accent = prefs.accentColor || "#a855f7";
   root.style.setProperty("--accent", accent);
 
   // Compute hover & dim shades
@@ -247,7 +247,7 @@ function hexToRgba(hex: string, alpha: number): string {
     c = c.split("").map((x) => x + x).join("");
   }
   const num = parseInt(c, 16);
-  if (isNaN(num)) return `rgba(244, 117, 33, ${alpha})`;
+  if (isNaN(num)) return `rgba(168, 85, 247, ${alpha})`;
   const r = (num >> 16) & 255;
   const g = (num >> 8) & 255;
   const b = num & 255;
@@ -291,24 +291,24 @@ class UserStoreState {
 
   loadFromStorage() {
     try {
-      const storedProfiles = localStorage.getItem("cr_profiles");
+      const storedProfiles = localStorage.getItem("luci_profiles");
       if (storedProfiles) {
         this.profiles = JSON.parse(storedProfiles);
       } else {
         this.profiles = DEFAULT_PROFILES;
-        localStorage.setItem("cr_profiles", JSON.stringify(DEFAULT_PROFILES));
+        localStorage.setItem("luci_profiles", JSON.stringify(DEFAULT_PROFILES));
       }
 
-      const activeId = localStorage.getItem("cr_active_profile_id");
+      const activeId = localStorage.getItem("luci_active_profile_id");
       const found = this.profiles.find((p) => p.id === activeId);
       this.activeProfile = found || this.profiles[0] || DEFAULT_PROFILES[0];
 
-      const storedNotifs = localStorage.getItem("cr_notifications");
+      const storedNotifs = localStorage.getItem("luci_notifications");
       if (storedNotifs) {
         this.notifications = JSON.parse(storedNotifs);
       } else {
         this.notifications = DEFAULT_NOTIFICATIONS;
-        localStorage.setItem("cr_notifications", JSON.stringify(DEFAULT_NOTIFICATIONS));
+        localStorage.setItem("luci_notifications", JSON.stringify(DEFAULT_NOTIFICATIONS));
       }
 
       const storedPresets = localStorage.getItem("luci_custom_presets");
@@ -316,7 +316,7 @@ class UserStoreState {
         this.customPresets = JSON.parse(storedPresets);
       }
 
-      const storedPrefs = localStorage.getItem("cr_preferences");
+      const storedPrefs = localStorage.getItem("luci_preferences");
       if (storedPrefs) {
         this.preferences = { ...DEFAULT_PREFS, ...JSON.parse(storedPrefs) };
       }
@@ -332,10 +332,10 @@ class UserStoreState {
 
   setActiveProfile(profile: UserProfile) {
     this.activeProfile = profile;
-    localStorage.setItem("cr_active_profile_id", profile.id);
+    localStorage.setItem("luci_active_profile_id", profile.id);
   }
 
-  addProfile(name: string, avatar: string, color: string = "#f47521", isKid: boolean = false) {
+  addProfile(name: string, avatar: string, color: string = "#a855f7", isKid: boolean = false) {
     const newProfile: UserProfile = {
       id: "p_" + Date.now(),
       name: name.trim() || "Anime Fan",
@@ -346,7 +346,7 @@ class UserStoreState {
     };
     this.profiles = [...this.profiles, newProfile];
     this.setActiveProfile(newProfile);
-    localStorage.setItem("cr_profiles", JSON.stringify(this.profiles));
+    localStorage.setItem("luci_profiles", JSON.stringify(this.profiles));
   }
 
   deleteProfile(id: string) {
@@ -355,7 +355,7 @@ class UserStoreState {
     if (this.activeProfile.id === id) {
       this.setActiveProfile(this.profiles[0]);
     }
-    localStorage.setItem("cr_profiles", JSON.stringify(this.profiles));
+    localStorage.setItem("luci_profiles", JSON.stringify(this.profiles));
   }
 
   updateProfile(id: string, updates: Partial<UserProfile>) {
@@ -363,13 +363,13 @@ class UserStoreState {
     if (this.activeProfile.id === id) {
       this.activeProfile = { ...this.activeProfile, ...updates };
     }
-    localStorage.setItem("cr_profiles", JSON.stringify(this.profiles));
+    localStorage.setItem("luci_profiles", JSON.stringify(this.profiles));
   }
 
   updatePreferences(updates: Partial<AppPreferences>) {
     this.preferences = { ...this.preferences, ...updates };
     applyAppearanceToDocument(this.preferences);
-    localStorage.setItem("cr_preferences", JSON.stringify(this.preferences));
+    localStorage.setItem("luci_preferences", JSON.stringify(this.preferences));
   }
 
   saveCustomPreset(name: string) {
@@ -403,17 +403,17 @@ class UserStoreState {
 
   markNotificationRead(id: string) {
     this.notifications = this.notifications.map((n) => (n.id === id ? { ...n, read: true } : n));
-    localStorage.setItem("cr_notifications", JSON.stringify(this.notifications));
+    localStorage.setItem("luci_notifications", JSON.stringify(this.notifications));
   }
 
   markAllNotificationsRead() {
     this.notifications = this.notifications.map((n) => ({ ...n, read: true }));
-    localStorage.setItem("cr_notifications", JSON.stringify(this.notifications));
+    localStorage.setItem("luci_notifications", JSON.stringify(this.notifications));
   }
 
   clearNotifications() {
     this.notifications = [];
-    localStorage.setItem("cr_notifications", JSON.stringify([]));
+    localStorage.setItem("luci_notifications", JSON.stringify([]));
   }
 
   get unreadNotificationsCount() {

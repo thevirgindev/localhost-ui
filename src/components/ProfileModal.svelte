@@ -4,7 +4,7 @@
   let isAdding = $state(false);
   let newName = $state("");
   let selectedAvatar = $state("https://images.unsplash.com/photo-1578632767115-351597cf2477?w=160&auto=format&fit=crop&q=80");
-  let selectedColor = $state("#f47521");
+  let selectedColor = $state("#a855f7");
   let isKid = $state(false);
 
   const presetAvatars = [
@@ -16,7 +16,7 @@
     { url: "https://images.unsplash.com/photo-1550684848-fac1c5b4e853?w=160&auto=format&fit=crop&q=80", label: "Cyber Ninja" },
   ];
 
-  const presetColors = ["#f47521", "#3b82f6", "#10b981", "#a855f7", "#ec4899", "#eab308"];
+  const presetColors = ["#a855f7", "#3b82f6", "#10b981", "#a855f7", "#ec4899", "#eab308"];
 
   function closeModal() {
     userStore.showProfileModal = false;
@@ -54,7 +54,7 @@
             : "Select your active profile to continue watching where you left off."}
         </p>
       </div>
-      <button class="close-btn" onclick={closeModal} title="Close">✕</button>
+      <button class="close-btn" onclick={closeModal} title="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
 
     {#if !isAdding}
@@ -73,7 +73,7 @@
             <div class="avatar-box" style="border-color: {isActive ? profile.color : 'transparent'}">
               <img src={profile.avatar} alt={profile.name} />
               {#if isActive}
-                <span class="active-badge" style="background: {profile.color}">✓ ACTIVE</span>
+                <span class="active-badge" style="background: {profile.color}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" width="10" height="10" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ACTIVE</span>
               {/if}
             </div>
 
@@ -91,7 +91,7 @@
                   userStore.deleteProfile(profile.id);
                 }}
               >
-                ✕
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             {/if}
           </div>
@@ -275,7 +275,7 @@
   }
 
   .profile-item:hover .avatar-box {
-    border-color: #f47521;
+    border-color: #a855f7;
   }
 
   .avatar-box img {
@@ -369,8 +369,8 @@
   }
 
   .add-profile-item:hover .add-icon-box {
-    border-color: #f47521;
-    background: rgba(244, 117, 33, 0.08);
+    border-color: #a855f7;
+    background: rgba(168, 85, 247, 0.08);
   }
 
   .plus-sign {
@@ -381,7 +381,7 @@
   }
 
   .add-profile-item:hover .plus-sign {
-    color: #f47521;
+    color: #a855f7;
   }
 
   /* Form */
@@ -415,7 +415,7 @@
   }
 
   .form-input:focus {
-    border-color: #f47521;
+    border-color: #a855f7;
   }
 
   .avatar-choices {
@@ -443,7 +443,7 @@
   }
 
   .avatar-choice.selected {
-    border-color: #f47521;
+    border-color: #a855f7;
   }
 
   .color-choices {

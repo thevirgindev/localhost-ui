@@ -175,7 +175,7 @@
         spellcheck="false"
       />
       {#if query}
-        <button class="clear-btn" onclick={clearSearch} title="Clear search">✕</button>
+        <button class="clear-btn" onclick={clearSearch} title="Clear search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="13" height="13" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
       {/if}
     </div>
 
@@ -266,27 +266,27 @@
       <span class="active-label">Filters:</span>
       {#if query.trim()}
         <button class="active-tag" onclick={clearSearch}>
-          "{query.trim()}" ✕
+          "{query.trim()}" <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       {/if}
       {#if selectedGenre}
         <button class="active-tag" onclick={() => { selectedGenre = ""; load(true); }}>
-          Genre: {selectedGenre} ✕
+          Genre: {selectedGenre} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       {/if}
       {#if format}
         <button class="active-tag" onclick={() => { format = ""; load(true); }}>
-          Format: {FORMATS.find((f) => f.value === format)?.label} ✕
+          Format: {FORMATS.find((f) => f.value === format)?.label} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       {/if}
       {#if status}
         <button class="active-tag" onclick={() => { status = ""; load(true); }}>
-          Status: {STATUSES.find((s) => s.value === status)?.label} ✕
+          Status: {STATUSES.find((s) => s.value === status)?.label} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       {/if}
       {#if year !== ""}
         <button class="active-tag" onclick={() => { year = ""; load(true); }}>
-          Year: {year} ✕
+          Year: {year} <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       {/if}
       <button class="clear-all-btn" onclick={clearAllFilters}>Clear all</button>

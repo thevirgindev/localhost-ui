@@ -167,7 +167,7 @@
         />
         {#if query}
           <button class="clear-icon-btn" onclick={clearQuery} title="Clear text">
-            ✕
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         {/if}
       </div>
@@ -175,7 +175,7 @@
       <div class="header-actions">
         <span class="esc-badge">ESC</span>
         <button class="close-btn" onclick={closeSearch} title="Close search">
-          ✕
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
     </div>
@@ -202,7 +202,7 @@
           <div class="trending-pills">
             {#each trendingSearches as t}
               <button class="trending-pill" onclick={() => pickTrending(t)}>
-                <span class="fire-icon">🔥</span>
+                <span class="fire-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" /></svg></span>
                 <span>{t}</span>
               </button>
             {/each}
@@ -241,10 +241,10 @@
                 {#if anime.cover}
                   <img src={anime.cover} alt={anime.title} loading="lazy" />
                 {:else}
-                  <div class="no-cover">▶</div>
+                  <div class="no-cover"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                 {/if}
                 <div class="play-overlay">
-                  <span class="mini-play">▶</span>
+                  <span class="mini-play"><svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><polygon points="6 3 20 12 6 21 6 3"/></svg></span>
                 </div>
               </div>
 
@@ -252,7 +252,7 @@
                 <div class="result-meta">
                   <span class="res-badge">{anime.format === "MOVIE" ? "Movie" : "Series"}</span>
                   {#if anime.averageScore}
-                    <span class="res-score">★ {anime.averageScore}%</span>
+                    <span class="res-score"><svg viewBox="0 0 24 24" fill="currentColor" width="11" height="11"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> {anime.averageScore}%</span>
                   {/if}
                   <span class="res-episodes">{anime.episodes ? `${anime.episodes} eps` : "24 eps"}</span>
                 </div>
@@ -276,7 +276,7 @@
                 <div class="spinner-inline"></div>
                 <span>Loading more anime...</span>
               {:else}
-                <span>Show More Anime ↓</span>
+                <span>Show More Anime <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg></span>
               {/if}
             </button>
           </div>
@@ -290,7 +290,7 @@
         <kbd>↑</kbd> <kbd>↓</kbd> to navigate • <kbd>ENTER</kbd> to select • <kbd>ESC</kbd> to dismiss
       </div>
       <a class="view-all-link" href="#/browse" onclick={closeSearch}>
-        Open Full Catalog in Explore →
+        Open Full Catalog in Explore <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
       </a>
     </div>
   </div>
@@ -367,7 +367,7 @@
   .search-icon {
     width: 22px;
     height: 22px;
-    color: #f47521;
+    color: #a855f7;
     flex-shrink: 0;
   }
 

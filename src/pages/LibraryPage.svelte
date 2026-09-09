@@ -223,7 +223,7 @@
         <div class="spinner"></div>
       {:else if watchlistItems.length === 0}
         <div class="empty-state">
-          <div class="big">☆</div>
+          <div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.75l-6.172 3.245 1.179-6.873-5-4.867 6.9-1.003L12 3l2.093 5.252 6.9 1.003-5 4.867 1.179 6.873z"/></svg></div>
           <p>Your watchlist is empty.</p>
           <p class="hint">Explore anime and click “Add to List” on any series page.</p>
         </div>
@@ -243,7 +243,7 @@
                 {#if item.cover}
                   <img class="thumb" src={item.cover} alt={item.title} loading="lazy" />
                 {:else}
-                  <div class="thumb no-img">▶</div>
+                  <div class="thumb no-img"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                 {/if}
               </button>
 
@@ -310,7 +310,7 @@
         <div class="spinner"></div>
       {:else if continueItems.length === 0}
         <div class="empty-state">
-          <div class="big">▶</div>
+          <div class="big"><svg viewBox="0 0 24 24" fill="currentColor" width="40" height="40"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
           <p>No titles currently in progress.</p>
           <p class="hint">When you start watching an episode, it will appear here so you can resume anytime.</p>
         </div>
@@ -332,7 +332,7 @@
                 {#if item.cover}
                   <img src={item.cover} alt={item.title} loading="lazy" />
                 {:else}
-                  <div class="no-img">▶</div>
+                  <div class="no-img"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                 {/if}
                 <div class="cw-overlay">
                   <span class="cw-play-btn">
@@ -421,13 +421,13 @@
           </div>
         {:else if folders.length > 0}
           <div class="empty-state">
-            <div class="big">📁</div>
+            <div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg></div>
             <p>No video files found in the watched folders.</p>
             <p class="hint">Name each folder after the series with episodes inside (.mp4, .mkv).</p>
           </div>
         {:else}
           <div class="empty-state">
-            <div class="big">📁</div>
+            <div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg></div>
             <p>No local folders added yet.</p>
             <p class="hint">Click "Add Folder" to point to your offline collection.</p>
           </div>

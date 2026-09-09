@@ -1,5 +1,5 @@
 // Generates a 1024x1024 RGBA PNG app icon without any dependencies.
-// Design: dark rounded square, orange inner rounded square, white underscore bar.
+// Design: dark rounded square, purple inner rounded square, dark sparkle mark.
 const zlib = require("zlib");
 const fs = require("fs");
 const path = require("path");
@@ -24,8 +24,19 @@ function roundedRectMask(x, y, w, h, r, px, py) {
 }
 
 const bg = [10, 12, 16, 255]; // #0a0c10
-const orange = [244, 117, 33, 255]; // #f47521
-const white = [232, 234, 238, 255]; // #e8eaee
+const purple = [168, 85, 247, 255]; // #a855f7
+const dark = [13, 13, 13, 255]; // #0d0d0d
+
+// Inside-test for a diamond (|dx|/a + |dy|/b <= 1) with a soft AA edge.
+function diamondMask(cx, cy, a, b, px, py) {
+  const d = Math.abs(px - cx) / a + Math.abs(py - cy) / b;
+  return clamp((1 - d) * 40, 0, 1);
+}
+
+function circleMask(cx, cy, r, px, py) {
+  const d = Math.hypot(px - cx, py - cy) - r;
+  return clamp(0.5 - d, 0, 1);
+}
 
 const raw = Buffer.alloc(SIZE * (SIZE * 4 + 1));
 
@@ -37,22 +48,28 @@ for (let py = 0; py < SIZE; py++) {
 
     // outer dark rounded square (with transparency outside)
     const outer = roundedRectMask(32, 32, SIZE - 64, SIZE - 64, 200, px, py);
-    // inner orange rounded square
+    // inner purple rounded square
     const inner = roundedRectMask(160, 160, SIZE - 320, SIZE - 320, 130, px, py);
-    // white underscore bar in the middle
-    const bar = roundedRectMask(300, 560, 424, 120, 60, px, py);
+    // dark 4-point sparkle in the middle (union of two thin diamonds)
+    const sparkle = Math.max(
+      diamondMask(512, 512, 95, 300, px, py),
+      diamondMask(512, 512, 300, 95, px, py),
+    );
+    // small dark accent dot (top-right of the sparkle)
+    const dot = circleMask(720, 330, 62, px, py);
+    const mark = Math.max(sparkle, dot);
 
     let r = 0, g = 0, b = 0, a = 0;
     // start from bg
     r = bg[0]; g = bg[1]; b = bg[2]; a = bg[3] * outer;
-    // blend orange over it
-    r = r * (1 - inner) + orange[0] * inner;
-    g = g * (1 - inner) + orange[1] * inner;
-    b = b * (1 - inner) + orange[2] * inner;
-    // blend white bar over that
-    r = r * (1 - bar) + white[0] * bar;
-    g = g * (1 - bar) + white[1] * bar;
-    b = b * (1 - bar) + white[2] * bar;
+    // blend purple over it
+    r = r * (1 - inner) + purple[0] * inner;
+    g = g * (1 - inner) + purple[1] * inner;
+    b = b * (1 - inner) + purple[2] * inner;
+    // blend dark sparkle over that
+    r = r * (1 - mark) + dark[0] * mark;
+    g = g * (1 - mark) + dark[1] * mark;
+    b = b * (1 - mark) + dark[2] * mark;
 
     raw[i] = Math.round(clamp(r, 0, 255));
     raw[i + 1] = Math.round(clamp(g, 0, 255));

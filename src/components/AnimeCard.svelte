@@ -94,7 +94,7 @@
 
     {#if card.averageScore}
       <div class="score-badge">
-        ★ {card.averageScore}%
+        <svg viewBox="0 0 24 24" fill="currentColor" width="12" height="12"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"/></svg> {card.averageScore}%
       </div>
     {/if}
 
@@ -183,7 +183,7 @@
     position: absolute;
     top: 8px;
     left: 8px;
-    background: #f47521;
+    background: #a855f7;
     color: #0d0d0d;
     font-size: 10px;
     font-weight: 800;
@@ -220,9 +220,9 @@
   .quick-bookmark.active {
     opacity: 1;
     transform: scale(1);
-    background: #f47521;
+    background: #a855f7;
     color: #0d0d0d;
-    border-color: #f47521;
+    border-color: #a855f7;
   }
 
   .card:hover .quick-bookmark,
@@ -232,7 +232,7 @@
   }
 
   .quick-bookmark:hover {
-    background: #ff8533;
+    background: #c084fc;
     color: #0d0d0d;
     transform: scale(1.1) !important;
   }
@@ -281,7 +281,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: #f47521;
+    background: #a855f7;
     color: #000000;
     font-size: 13px;
     font-weight: 800;
@@ -289,7 +289,7 @@
     border-radius: 999px;
     transform: scale(0.88) translateY(6px);
     opacity: 0;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65), 0 0 14px rgba(244, 117, 33, 0.45);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65), 0 0 14px rgba(168, 85, 247, 0.45);
     transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
                 opacity 0.18s ease,
                 background 0.12s ease;
@@ -322,7 +322,7 @@
 
   .card:hover .title,
   .card:focus-visible .title {
-    color: #f47521;
+    color: #a855f7;
   }
 
   .sub {
@@ -347,25 +347,25 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #f47521;
+    background: #a855f7;
     display: inline-block;
     flex-shrink: 0;
-    box-shadow: 0 0 8px #f47521;
+    box-shadow: 0 0 8px #a855f7;
     animation: pulse 1.8s infinite;
   }
 
   @keyframes pulse {
     0% {
       transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(244, 117, 33, 0.7);
+      box-shadow: 0 0 0 0 rgba(168, 85, 247, 0.7);
     }
     70% {
       transform: scale(1.05);
-      box-shadow: 0 0 0 6px rgba(244, 117, 33, 0);
+      box-shadow: 0 0 0 6px rgba(168, 85, 247, 0);
     }
     100% {
       transform: scale(0.95);
-      box-shadow: 0 0 0 0 rgba(244, 117, 33, 0);
+      box-shadow: 0 0 0 0 rgba(168, 85, 247, 0);
     }
   }
 

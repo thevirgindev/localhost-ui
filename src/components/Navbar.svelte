@@ -54,6 +54,19 @@
     showProfileMenu = false;
   }
 
+  // Custom frameless-window controls (no-op outside Tauri).
+  async function windowCtrl(action: "minimize" | "maximize" | "close") {
+    try {
+      const { getCurrentWindow } = await import("@tauri-apps/api/window");
+      const w = getCurrentWindow();
+      if (action === "minimize") await w.minimize();
+      else if (action === "maximize") await w.toggleMaximize();
+      else await w.close();
+    } catch {
+      // Browser preview — no window controls
+    }
+  }
+
   onMount(() => {
     function handleDocumentClick() {
       showProfileMenu = false;
@@ -80,21 +93,18 @@
   });
 </script>
 
-<header class="navbar">
+<header class="navbar" data-tauri-drag-region>
   <div class="nav-inner">
     <!-- Far Left: Crunchyroll Logo -->
     <div class="nav-left">
       <a class="brand" href="#/">
-        <svg class="cr-logo" viewBox="0 0 32 32" fill="none">
-          <circle cx="16" cy="16" r="16" fill="#F47521" />
+        <svg class="cr-logo" viewBox="0 0 24 24" fill="none">
+          <rect x="1" y="1" width="22" height="22" rx="6" fill="#a855f7" />
           <path
-            d="M20 16C20 18.2091 18.2091 20 16 20C13.7909 20 12 18.2091 12 16C12 13.7909 13.7909 12 16 12C18.2091 12 20 13.7909 20 16Z"
-            fill="#0D0D0D"
+            d="M12 5.5l1.55 4.35a2 2 0 0 0 1.2 1.2L19.1 12.6l-4.35 1.55a2 2 0 0 0-1.2 1.2L12 19.7l-1.55-4.35a2 2 0 0 0-1.2-1.2L4.9 12.6l4.35-1.55a2 2 0 0 0 1.2-1.2z"
+            fill="#0d0d0d"
           />
-          <path
-            d="M16 6.5C21.2467 6.5 25.5 10.7533 25.5 16C25.5 18.9484 24.1543 21.5822 22.0366 23.3274C21.1764 20.0322 18.1767 17.5833 14.625 17.5833C11.7853 17.5833 9.3134 19.1541 8.05156 21.4688C7.08643 19.9135 6.5 18.0468 6.5 16C6.5 10.7533 10.7533 6.5 16 6.5Z"
-            fill="#0D0D0D"
-          />
+          <circle cx="17.8" cy="6.2" r="1.3" fill="#0d0d0d" />
         </svg>
         <span class="brand-text">Luci</span>
       </a>
@@ -198,7 +208,7 @@
 
             <div class="menu-footer">
               <a href="#/season" class="menu-footer-link" onclick={() => (showNotifsMenu = false)}>
-                View Full Seasonal Airings Schedule →
+                View Full Seasonal Airings Schedule <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
               </a>
             </div>
           </div>
@@ -250,12 +260,12 @@
 
             <!-- Action Items -->
             <button class="dropdown-item" onclick={openSettings} role="menuitem">
-              <span class="item-icon">⚙️</span>
+              <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg></span>
               <span>Settings Center</span>
             </button>
 
             <button class="dropdown-item" onclick={openProfileModal} role="menuitem">
-              <span class="item-icon">👥</span>
+              <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg></span>
               <span>Switch Profile</span>
             </button>
 
@@ -265,7 +275,7 @@
               onclick={() => (showProfileMenu = false)}
               role="menuitem"
             >
-              <span class="item-icon">📑</span>
+              <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z" /></svg></span>
               <span>My Lists & Watchlist</span>
             </a>
 
@@ -275,23 +285,36 @@
               onclick={() => (showProfileMenu = false)}
               role="menuitem"
             >
-              <span class="item-icon">🕒</span>
+              <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg></span>
               <span>Watch History</span>
             </a>
 
             <button class="dropdown-item" onclick={openChangelog} role="menuitem">
-              <span class="item-icon">✨</span>
+              <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z" /></svg></span>
               <span>What's New (v2.4.0)</span>
             </button>
 
             <div class="dropdown-divider"></div>
 
             <button class="dropdown-item logout-item" onclick={openProfileModal} role="menuitem">
-              <span class="item-icon">🚪</span>
+              <span class="item-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg></span>
               <span>Log Out</span>
             </button>
           </div>
         {/if}
+      </div>
+
+      <!-- Frameless window controls -->
+      <div class="window-controls">
+        <button class="win-btn" onclick={() => windowCtrl("minimize")} aria-label="Minimize" title="Minimize">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+        </button>
+        <button class="win-btn" onclick={() => windowCtrl("maximize")} aria-label="Maximize" title="Maximize">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2" /></svg>
+        </button>
+        <button class="win-btn close" onclick={() => windowCtrl("close")} aria-label="Close" title="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+        </button>
       </div>
     </div>
   </div>
@@ -305,9 +328,42 @@
     right: 0;
     z-index: 1000;
     height: 64px;
-    background: rgba(0, 0, 0, 0.88);
+    background: rgba(10, 10, 14, 0.6);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     pointer-events: auto;
+  }
+
+  .window-controls {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: 6px;
+  }
+
+  .win-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 30px;
+    border-radius: 4px;
+    color: #c4c4cb;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background 0.12s ease, color 0.12s ease;
+  }
+
+  .win-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+  }
+
+  .win-btn.close:hover {
+    background: #e81123;
+    color: #ffffff;
   }
 
   .nav-inner {
@@ -343,7 +399,7 @@
     font-size: 24px;
     font-weight: 900;
     letter-spacing: -0.03em;
-    color: var(--accent, #f47521);
+    color: var(--accent, #a855f7);
     font-family: inherit;
     line-height: 1;
   }
@@ -390,7 +446,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: #f47521;
+    background: #a855f7;
     border-radius: 2px 2px 0 0;
   }
 
@@ -417,7 +473,7 @@
   }
 
   .nav-icon-btn:hover {
-    color: #f47521;
+    color: #a855f7;
     background: rgba(255, 255, 255, 0.06);
   }
 
@@ -431,7 +487,7 @@
     right: 6px;
     width: 16px;
     height: 16px;
-    background: #f47521;
+    background: #a855f7;
     color: #000000;
     font-size: 10px;
     font-weight: 900;
@@ -462,7 +518,7 @@
 
   .profile-pill-btn:hover {
     background: #22242e;
-    border-color: #f47521;
+    border-color: #a855f7;
   }
 
   .avatar-ring {
@@ -470,7 +526,7 @@
     height: 28px;
     border-radius: 4px;
     overflow: hidden;
-    border: 2px solid #f47521;
+    border: 2px solid #a855f7;
     flex-shrink: 0;
   }
 
@@ -629,7 +685,7 @@
   .mark-read-btn {
     background: transparent;
     border: none;
-    color: #f47521;
+    color: #a855f7;
     font-size: 11.5px;
     font-weight: 700;
     cursor: pointer;
@@ -658,8 +714,8 @@
   }
 
   .notif-card.unread {
-    background: rgba(244, 117, 33, 0.06);
-    border-left: 3px solid #f47521;
+    background: rgba(168, 85, 247, 0.06);
+    border-left: 3px solid #a855f7;
   }
 
   .notif-img {
@@ -706,7 +762,7 @@
   }
 
   .menu-footer-link {
-    color: #f47521;
+    color: #a855f7;
     font-size: 12px;
     font-weight: 700;
     text-decoration: none;

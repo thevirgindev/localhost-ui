@@ -76,7 +76,7 @@
     </div>
   {:else if items.length === 0}
     <div class="empty-state">
-      <div class="big">☆</div>
+      <div class="big"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="40" height="40" stroke-linecap="round" stroke-linejoin="round"><path d="M12 17.75l-6.172 3.245 1.179-6.873-5-4.867 6.9-1.003L12 3l2.093 5.252 6.9 1.003-5 4.867 1.179 6.873z"/></svg></div>
       <p>Your watchlist is empty.</p>
       <p class="hint">Browse titles and click “My List” to add anime here.</p>
     </div>
@@ -92,7 +92,7 @@
             {#if item.cover}
               <img class="thumb" src={item.cover} alt={item.title} loading="lazy" />
             {:else}
-              <div class="thumb no-img">▶</div>
+              <div class="thumb no-img"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
             {/if}
           </button>
 

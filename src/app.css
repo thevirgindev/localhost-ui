@@ -20,9 +20,9 @@
   --text: #ffffff;
   --text-dim: #9ba1b0;
   --text-faint: #676c7b;
-  --accent: #f47521;
-  --accent-hover: #ff8533;
-  --accent-dim: rgba(244, 117, 33, 0.14);
+  --accent: #a855f7;
+  --accent-hover: #c084fc;
+  --accent-dim: rgba(168, 85, 247, 0.14);
   --green: #2ecc71;
   --radius: 6px;
   --radius-sm: 4px;
@@ -369,13 +369,17 @@ img {
 .spinner {
   width: 44px;
   height: 44px;
-  border: 3.5px solid rgba(244, 117, 33, 0.08);
-  border-top-color: #f47521;
-  border-right-color: rgba(244, 117, 33, 0.85);
+  border: 3.5px solid rgba(168, 85, 247, 0.08);
+  border-top-color: #a855f7;
+  border-right-color: rgba(168, 85, 247, 0.85);
   border-radius: 50%;
   animation: spin 0.75s cubic-bezier(0.5, 0.1, 0.4, 0.9) infinite;
-  margin: 100px auto;
-  box-shadow: 0 0 16px rgba(244, 117, 33, 0.2);
+  margin: 0 auto;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.2);
 }
 
 @keyframes spin {

@@ -8,6 +8,11 @@ edition = "2021"
 [lib]
 name = "luci_lib"
 crate-type = ["rlib"]
+# All tests live in tests/db_tests.rs (integration). The empty lib unittest
+# harness binary hits STATUS_ENTRYPOINT_NOT_FOUND at loader time on
+# windows-gnu, so disable it. If you add #[cfg(test)] unit tests inside src/,
+# remove this line again.
+test = false
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }

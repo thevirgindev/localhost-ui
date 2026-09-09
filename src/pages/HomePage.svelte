@@ -80,7 +80,7 @@
                   {#if item.cover}
                     <img src={item.cover} alt="" loading="lazy" />
                   {:else}
-                    <div class="cw-noimg">▶</div>
+                    <div class="cw-noimg"><svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                   {/if}
 
                   <div class="cw-hover-overlay">

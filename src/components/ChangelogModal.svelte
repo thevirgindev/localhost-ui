@@ -19,7 +19,7 @@
         <span class="version-tag">Version 2.4.0 Update</span>
         <h2 class="title">What's New in Luci Anime</h2>
       </div>
-      <button class="close-btn" onclick={close} title="Close">✕</button>
+      <button class="close-btn" onclick={close} title="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
     </div>
 
     <div class="changelog-body">
@@ -114,7 +114,7 @@
   .version-tag {
     font-size: 11px;
     font-weight: 800;
-    color: #f47521;
+    color: #a855f7;
     letter-spacing: 0.08em;
   }
 
@@ -165,7 +165,7 @@
   }
 
   .release-badge.new {
-    background: #f47521;
+    background: #a855f7;
     color: #000000;
   }
 

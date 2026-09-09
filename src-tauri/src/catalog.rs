@@ -7,6 +7,25 @@ use tokio::sync::Mutex;
 
 const JIKAN: &str = "https://api.jikan.moe/v4";
 
+/// Tolerant list deserializer: Jikan occasionally returns `{}` or `null` for
+/// list fields (rate-limit hiccups / partial data), which would otherwise
+/// abort the whole `AnimeCard` parse with "invalid type: map, expected a sequence".
+fn seq_or_empty<'de, D, T>(de: D) -> Result<Vec<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: serde::de::DeserializeOwned,
+{
+    let v = serde_json::Value::deserialize(de)?;
+    match v {
+        serde_json::Value::Array(items) => Ok(items
+            .into_iter()
+            .filter_map(|x| serde_json::from_value::<T>(x).ok())
+            .collect()),
+        // Any non-sequence shape degrades to an empty list instead of failing.
+        _ => Ok(Vec::new()),
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Cache (same design as the old AniList cache)
 // ---------------------------------------------------------------------------
@@ -140,13 +159,13 @@ pub struct JikanAnime {
     pub title: Option<String>,
     pub title_english: Option<String>,
     pub title_japanese: Option<String>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "seq_or_empty")]
     pub titles: Vec<JikanTitleEntry>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "seq_or_empty")]
     pub genres: Vec<JikanStudio>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "seq_or_empty")]
     pub studios: Vec<JikanStudio>,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "seq_or_empty")]
     pub themes: Vec<JikanStudio>,
     pub r#type: Option<String>,
     pub source: Option<String>,
@@ -464,12 +483,16 @@ pub async fn anime_details(cache: State<'_, JikanCache>, id: i64) -> Result<Anim
 
     let jikan = jikan_get(&cache, &format!("details:{id}"), &format!("/anime/{id}/full"), Duration::from_secs(3600)).await;
     match jikan {
-        Ok(json) => {
-            let anime: JikanAnime =
-                serde_json::from_value(json.get("data").cloned().unwrap_or(serde_json::Value::Null))
-                    .map_err(|e| e.to_string())?;
-            Ok(anime.into_card())
-        }
+        Ok(json) => match serde_json::from_value::<JikanAnime>(
+            json.get("data").cloned().unwrap_or(serde_json::Value::Null),
+        ) {
+            Ok(anime) => Ok(anime.into_card()),
+            Err(e) => {
+                eprintln!("[luci] details parse failed for {id}: {e}; trying Kitsu fallback");
+                let mapped = kitsu_by_mal(id).await?;
+                mapped.ok_or_else(|| format!("anime details parse failed: {e}"))
+            }
+        },
         Err(_) => {
             // Kitsu detail fallback requires resolving the MAL id → Kitsu id.
             let mapped = kitsu_by_mal(id).await?;

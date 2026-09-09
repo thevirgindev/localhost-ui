@@ -1,11 +1,9 @@
 mod catalog;
 mod commands;
-mod db;
+pub mod db;
 mod jikan;
 mod kitsu;
 mod library;
-#[cfg(test)]
-mod tests;
 mod types;
 
 use tauri::Manager;

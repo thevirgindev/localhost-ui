@@ -294,12 +294,12 @@
           <span class="meta-sep">•</span>
           <span class="rating-badge">PG-13</span>
           <span class="meta-sep">•</span>
-          <span class="meta-subs">Subtitles: 🇺🇸 🇲🇽 🇧🇷 🇯🇵 🇪🇸 🇩🇪</span>
+          <span class="meta-subs">Subtitles: US · MX · BR · JP · ES · DE</span>
         </div>
 
         <!-- 5 Stars + Vote count -->
         <div class="rating-strip">
-          <div class="stars">★★★★★</div>
+          <div class="stars"><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg><svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
           <span class="votes-count">{voteCountFormatted} votes</span>
         </div>
 
@@ -457,7 +457,7 @@
                 <div class="block-header-flex">
                   <h3 class="block-title">Main Characters & Cast</h3>
                   <button class="view-all-link" onclick={() => (activeTab = "characters")}>
-                    View All ({characters.length}) →
+                    View All ({characters.length}) <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                   </button>
                 </div>
                 <div class="cast-preview-row">
@@ -575,7 +575,7 @@
                     {#if card.banner || card.cover}
                       <img src={card.banner || card.cover} alt={ep.title} loading="lazy" />
                     {:else}
-                      <div class="ep-noimg">▶</div>
+                      <div class="ep-noimg"><svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><polygon points="6 3 20 12 6 21 6 3"/></svg></div>
                     {/if}
 
                     <div class="ep-hover-overlay">
@@ -695,7 +695,7 @@
                         onclick={() => voteComment(c, "up")}
                         title="Upvote"
                       >
-                        👍
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10v12" /><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z" /></svg>
                       </button>
                       <button
                         class="action-btn icon-only"
@@ -703,10 +703,10 @@
                         onclick={() => voteComment(c, "down")}
                         title="Downvote"
                       >
-                        👎
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M17 14V2" /><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z" /></svg>
                       </button>
                       <button class="action-btn icon-only flag" title="Report">
-                        ⚑
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg>
                       </button>
                     </div>
                   </div>
