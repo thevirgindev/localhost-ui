@@ -11,22 +11,24 @@
 
 :root {
   --bg: #0d0d0d;
-  --bg-raise: #141414;
-  --surface: #1c1c1e;
-  --surface-2: #28282a;
-  --surface-3: #343436;
-  --border: #262628;
+  --bg-raise: #141519;
+  --surface: #141519;
+  --surface-2: #23252b;
+  --surface-3: #2d3037;
+  --border: #23252b;
+  --border-soft: #23252b;
   --text: #ffffff;
-  --text-dim: #b0b0b3;
-  --text-faint: #75757a;
+  --text-dim: #a0a0a0;
+  --text-faint: #727278;
   --accent: #f47521;
-  --accent-hover: #ff8b3e;
-  --accent-dim: #f4752114;
+  --accent-hover: #ff8533;
+  --accent-dim: rgba(244, 117, 33, 0.14);
   --green: #2ecc71;
   --radius: 8px;
-  --radius-sm: 6px;
-  --nav-h: 66px;
-  --shadow: 0 10px 32px rgba(0, 0, 0, 0.55);
+  --radius-sm: 4px;
+  --radius-lg: 12px;
+  --nav-h: 60px;
+  --shadow: 0 10px 32px rgba(0, 0, 0, 0.65);
   --font: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --mono: "Cascadia Mono", Consolas, ui-monospace, monospace;
 }
@@ -80,19 +82,24 @@ select,
 textarea {
   font-family: inherit;
   color: var(--text);
-  background: var(--surface);
-  border: 1px solid transparent;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 9px 13px;
+  padding: 9px 14px;
   outline: none;
   font-size: 13.5px;
   user-select: text;
+  transition: border-color 0.14s ease, background 0.14s ease;
 }
 
 input:focus,
 select:focus {
   border-color: var(--accent);
-  background: var(--surface-2);
+  background: var(--surface-3);
+}
+
+select {
+  cursor: pointer;
 }
 
 img {
@@ -100,8 +107,8 @@ img {
 }
 
 ::-webkit-scrollbar {
-  width: 11px;
-  height: 11px;
+  width: 9px;
+  height: 9px;
 }
 
 ::-webkit-scrollbar-track {
@@ -109,13 +116,13 @@ img {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3a3a3d;
+  background: #2d3037;
   border-radius: 6px;
-  border: 3px solid var(--bg);
+  border: 2px solid var(--bg);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #4b4b4f;
+  background: #3d414a;
 }
 
 /* ---------- CR pill buttons ---------- */
@@ -139,7 +146,7 @@ img {
 
 .btn.primary {
   background: var(--accent);
-  color: #1a0d00;
+  color: #0d0d0d;
 }
 
 .btn.primary:hover {
@@ -167,68 +174,102 @@ img {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.btn.ghost {
+  background: transparent;
+  color: var(--text-dim);
+  padding: 8px 14px;
+}
+
+.btn.ghost:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.btn.danger {
+  background: #331818;
+  color: #ff9191;
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
+.btn.danger:hover {
+  background: #462020;
+  color: #ffa8a8;
+}
+
 .btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* ---------- filter pills (CR style: dim pill, white on active) ---------- */
+/* ---------- CR filter chips (pill-shaped, white on active) ---------- */
 
 .chip {
   display: inline-flex;
   align-items: center;
+  gap: 6px;
   padding: 7px 16px;
   border-radius: 999px;
-  background: var(--surface);
-  font-size: 12.5px;
+  background: var(--surface-2);
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-dim);
   cursor: pointer;
-  transition: all 0.13s ease;
+  border: 1px solid transparent;
+  transition: background 0.13s ease, color 0.13s ease, border-color 0.13s ease;
+  white-space: nowrap;
 }
 
 .chip:hover {
-  background: var(--surface-2);
+  background: var(--surface-3);
   color: var(--text);
 }
 
 .chip.active {
   background: var(--text);
   color: #0d0d0d;
+  font-weight: 700;
 }
 
 /* ---------- page scaffolding ---------- */
 
 .page {
-  padding: 22px 44px 64px;
+  padding: 24px 44px 64px;
   max-width: 1560px;
   margin: 0 auto;
 }
 
 .page-title {
-  font-size: 24px;
-  margin-bottom: 2px;
+  font-size: 26px;
+  margin-bottom: 4px;
+  letter-spacing: -0.02em;
 }
 
 .page-sub {
   color: var(--text-faint);
-  margin: 0 0 20px;
+  margin: 0 0 22px;
   font-size: 13px;
 }
 
 .section-title {
   font-size: 20px;
-  margin: 34px 0 14px;
+  margin: 36px 0 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+.section-title h3 {
+  font-size: 20px;
+  letter-spacing: -0.02em;
+}
+
 .section-title .link {
-  font-size: 12.5px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-faint);
   cursor: pointer;
+  transition: color 0.13s ease;
 }
 
 .section-title .link:hover {
@@ -237,8 +278,8 @@ img {
 
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-  gap: 24px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+  gap: 26px 16px;
 }
 
 .spinner {
@@ -257,7 +298,6 @@ img {
   }
 }
 
-/* CR-style skeleton shimmer */
 .skeleton {
   background: linear-gradient(100deg, var(--surface) 40%, var(--surface-2) 50%, var(--surface) 60%);
   background-size: 200% 100%;
@@ -272,9 +312,9 @@ img {
 }
 
 .error-box {
-  background: #2a1515;
-  border: 1px solid #4a2525;
-  color: #f0a5a5;
+  background: #231616;
+  border: 1px solid #4a2424;
+  color: #fca5a5;
   padding: 14px 18px;
   border-radius: var(--radius);
   margin: 22px 0;
@@ -294,7 +334,7 @@ img {
 .empty-state .big {
   font-size: 40px;
   margin-bottom: 12px;
-  opacity: 0.4;
+  opacity: 0.35;
 }
 
 .empty-state p {
@@ -305,37 +345,55 @@ img {
   font-size: 12.5px;
 }
 
-/* ---------- badges ---------- */
+/* ---------- badges & micro-labels ---------- */
+
+.micro-label {
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+}
 
 .badge {
   display: inline-block;
-  padding: 3px 9px;
-  border-radius: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
   font-size: 10px;
   font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
+  letter-spacing: 0.08em;
   background: var(--surface-2);
   color: var(--text-dim);
 }
 
 .badge.airing {
-  background: #16321f;
-  color: var(--green);
+  background: var(--accent-dim);
+  color: var(--accent);
 }
 
-/* CR format tag: orange corner ribbon on cards */
+/* CR format tag */
 .format-tag {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 8px;
+  left: 8px;
   background: var(--accent);
-  color: #1a0d00;
+  color: #0d0d0d;
   font-size: 10px;
   font-weight: 800;
-  padding: 3px 9px;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 3px 7px;
+  border-radius: var(--radius-sm);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.08em;
   z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* Orange dot for airing */
+.airing-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  display: inline-block;
+  flex-shrink: 0;
 }

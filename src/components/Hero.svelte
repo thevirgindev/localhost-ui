@@ -8,8 +8,9 @@
   let index = $state(0);
   let timer: ReturnType<typeof setInterval> | undefined = undefined;
 
-  const total = $derived(cards.length);
-  const current = $derived(cards[index]);
+  const slides = $derived(cards.slice(0, 5));
+  const total = $derived(slides.length);
+  const current = $derived(slides[index]);
 
   function startTimer() {
     if (timer) clearInterval(timer);
@@ -35,11 +36,11 @@
 
 {#if current}
   <section class="hero">
-    {#each cards.slice(0, 5) as card, i (card.id)}
+    {#each slides as card, i (card.id)}
       <div
         class="slide"
         class:visible={i === index}
-        style={card.cover ? `background-image: url('${card.cover}')` : ""}
+        style={card.banner || card.cover ? `background-image: url('${card.banner || card.cover}')` : ""}
       ></div>
     {/each}
     <div class="shade"></div>
@@ -49,11 +50,13 @@
         <div class="eyebrow">FEATURED SERIES</div>
         <h1>{current.title}</h1>
         <p class="desc">
-          {formatDesc(current.description).slice(0, 230)}{formatDesc(current.description).length > 230 ? "…" : ""}
+          {formatDesc(current.description).slice(0, 240)}{formatDesc(current.description).length > 240 ? "…" : ""}
         </p>
         <div class="actions">
           <button class="btn primary" onclick={() => router.navigate({ name: "details", id: current.id })}>
-            <svg viewBox="0 0 24 24" fill="currentColor" width="15" height="15"><path d="M8 5v14l11-7z" /></svg>
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              <path d="M8 5v14l11-7z" />
+            </svg>
             Start Watching
           </button>
           <button class="btn outline" onclick={() => router.navigate({ name: "details", id: current.id })}>
@@ -62,9 +65,14 @@
         </div>
       </div>
 
-      <div class="dots">
-        {#each cards.slice(0, 5) as _, i}
-          <button class="dot" class:on={i === index} onclick={() => pick(i)} aria-label="Slide {i + 1}"></button>
+      <div class="dashes">
+        {#each slides as _, i}
+          <button
+            class="dash"
+            class:active={i === index}
+            onclick={() => pick(i)}
+            aria-label="Slide {i + 1}"
+          ></button>
         {/each}
       </div>
     </div>
@@ -74,19 +82,21 @@
 <style>
   .hero {
     position: relative;
-    height: 66vh;
-    min-height: 460px;
+    height: 72vh;
+    min-height: 500px;
+    max-height: 680px;
     overflow: hidden;
     background: var(--surface);
+    margin-bottom: 24px;
   }
 
   .slide {
     position: absolute;
     inset: 0;
     background-size: cover;
-    background-position: center 22%;
+    background-position: center 25%;
     opacity: 0;
-    transition: opacity 0.7s ease;
+    transition: opacity 0.8s ease-in-out;
     transform: scale(1.02);
   }
 
@@ -98,8 +108,8 @@
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(to top, #0d0d0d 4%, rgba(13, 13, 13, 0.5) 48%, rgba(13, 13, 13, 0.12) 80%),
-      linear-gradient(to right, rgba(13, 13, 13, 0.9) 0%, rgba(13, 13, 13, 0.45) 42%, transparent 70%);
+      linear-gradient(to top, #0d0d0d 4%, rgba(13, 13, 13, 0.6) 45%, rgba(13, 13, 13, 0.15) 85%),
+      linear-gradient(to right, rgba(13, 13, 13, 0.95) 0%, rgba(13, 13, 13, 0.55) 45%, transparent 75%);
   }
 
   .hero-inner {
@@ -114,36 +124,37 @@
   }
 
   .content {
-    max-width: 640px;
+    max-width: 660px;
   }
 
   .eyebrow {
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 800;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     color: var(--accent);
     margin-bottom: 12px;
   }
 
   h1 {
-    font-size: 44px;
-    line-height: 1.04;
+    font-size: 46px;
+    line-height: 1.05;
     letter-spacing: -0.028em;
     margin-bottom: 14px;
-    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.7);
+    color: var(--text);
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.8);
   }
 
   .desc {
-    color: #d9d9db;
-    font-size: 14px;
+    color: #e2e2e4;
+    font-size: 14.5px;
     line-height: 1.6;
-    margin: 0 0 24px;
+    margin: 0 0 26px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.65);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
   }
 
   .actions {
@@ -152,24 +163,31 @@
     gap: 12px;
   }
 
-  .dots {
+  .dashes {
     position: absolute;
     right: 44px;
-    bottom: 60px;
+    bottom: 54px;
     display: flex;
-    gap: 7px;
+    align-items: center;
+    gap: 8px;
   }
 
-  .dot {
+  .dash {
     width: 22px;
     height: 4px;
-    border-radius: 2px;
-    background: rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.28);
     padding: 0;
-    transition: background 0.2s ease;
+    transition: all 0.25s ease;
+    cursor: pointer;
   }
 
-  .dot.on {
+  .dash:hover {
+    background: rgba(255, 255, 255, 0.5);
+  }
+
+  .dash.active {
+    width: 34px;
     background: var(--accent);
   }
 </style>

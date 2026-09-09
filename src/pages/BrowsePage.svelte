@@ -44,7 +44,7 @@
   let error = $state("");
   let sentinel: HTMLDivElement | undefined = $state();
   let debounceTimer: ReturnType<typeof setTimeout> | undefined;
-  let lastQuery = "";
+  let lastQuery = $state("");
 
   onMount(() => {
     readHashQuery();
@@ -95,7 +95,7 @@
 
   function onSearchInput() {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => load(true), 550);
+    debounceTimer = setTimeout(() => load(true), 500);
   }
 
   function toggleGenre(g: string) {
@@ -139,48 +139,69 @@
 </script>
 
 <div class="page">
-  <h1 class="page-title">{query.trim() ? `Results for “${lastQuery || query.trim()}”` : "Browse"}</h1>
-  <p class="page-sub">{firstLoad ? "Loading…" : `${cards.length}${hasNext ? "+" : ""} series`}</p>
+  <div class="browse-header">
+    <h1 class="page-title">{query.trim() ? `Results for “${lastQuery || query.trim()}”` : "Browse All"}</h1>
+    <p class="page-sub">{firstLoad ? "Loading catalog…" : `${cards.length}${hasNext ? "+" : ""} series`}</p>
+  </div>
 
-  <div class="filter-row">
-    <input
-      class="search-input"
-      bind:value={query}
-      oninput={onSearchInput}
-      placeholder="Filter by title…"
-      spellcheck="false"
-    />
-    <select onchange={setYear} value={String(year)}>
-      <option value="">Any year</option>
-      {#each Array.from({ length: 36 }, (_, i) => new Date().getFullYear() + 1 - i) as y}
-        <option value={String(y)}>{y}</option>
-      {/each}
-    </select>
-    <select onchange={setSort} value={sort}>
-      {#each SORTS as s}
-        <option value={s.value}>{s.label}</option>
-      {/each}
-    </select>
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="search-icon">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+      <input
+        class="search-input"
+        bind:value={query}
+        oninput={onSearchInput}
+        placeholder="Filter by title…"
+        spellcheck="false"
+      />
+    </div>
+
+    <div class="selects-wrap">
+      <select class="pill-select" onchange={setYear} value={String(year)}>
+        <option value="">Any Year</option>
+        {#each Array.from({ length: 36 }, (_, i) => new Date().getFullYear() + 1 - i) as y}
+          <option value={String(y)}>{y}</option>
+        {/each}
+      </select>
+
+      <select class="pill-select" onchange={setSort} value={sort}>
+        {#each SORTS as s}
+          <option value={s.value}>{s.label}</option>
+        {/each}
+      </select>
+    </div>
   </div>
 
   <div class="chip-row">
     {#each FORMATS as f}
-      <button class="chip" class:active={format === f.value} onclick={() => toggleFormat(f.value)}>{f.label}</button>
+      <button class="chip" class:active={format === f.value} onclick={() => toggleFormat(f.value)}>
+        {f.label}
+      </button>
     {/each}
     <span class="chip-divider"></span>
     {#each STATUSES as s}
-      <button class="chip" class:active={status === s.value} onclick={() => toggleStatus(s.value)}>{s.label}</button>
+      <button class="chip" class:active={status === s.value} onclick={() => toggleStatus(s.value)}>
+        {s.label}
+      </button>
     {/each}
   </div>
 
-  <div class="chip-row">
+  <div class="chip-row genres-row">
     {#each GENRES as g}
-      <button class="chip" class:active={genres.includes(g)} onclick={() => toggleGenre(g)}>{g}</button>
+      <button class="chip" class:active={genres.includes(g)} onclick={() => toggleGenre(g)}>
+        {g}
+      </button>
     {/each}
   </div>
 
   {#if error}
-    <div class="error-box"><span>{error}</span><button class="btn secondary" onclick={() => load(true)}>Retry</button></div>
+    <div class="error-box">
+      <span>{error}</span>
+      <button class="btn secondary" onclick={() => load(true)}>Retry</button>
+    </div>
   {/if}
 
   {#if firstLoad && loading}
@@ -191,33 +212,86 @@
         <AnimeCardItem {card} />
       {/each}
     </div>
+
     {#if !loading && cards.length === 0}
       <div class="empty-state">
         <div class="big">∅</div>
-        <p>Nothing matches those filters.</p>
-        <p class="hint">Try removing a genre or clearing the search.</p>
+        <p>No anime found matching your filters.</p>
+        <p class="hint">Try removing some genres or searching with a different term.</p>
       </div>
     {/if}
+
     {#if hasNext}
       <div bind:this={sentinel} class="sentinel">
-        {#if loading}<div class="spinner small"></div>{/if}
+        {#if loading}
+          <div class="spinner small"></div>
+        {/if}
       </div>
     {/if}
   {/if}
 </div>
 
 <style>
-  .filter-row {
+  .browse-header {
+    margin-bottom: 8px;
+  }
+
+  .filter-bar {
     display: flex;
-    gap: 10px;
-    margin-bottom: 16px;
+    gap: 12px;
+    margin-bottom: 18px;
+    align-items: center;
     flex-wrap: wrap;
   }
 
-  .search-input {
+  .search-wrap {
+    position: relative;
     flex: 1;
-    min-width: 240px;
+    min-width: 260px;
+  }
+
+  .search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 15px;
+    height: 15px;
+    color: var(--text-faint);
+    pointer-events: none;
+  }
+
+  .search-input {
+    width: 100%;
+    padding: 10px 18px 10px 40px;
     border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    font-size: 13.5px;
+  }
+
+  .search-input:focus {
+    border-color: var(--accent);
+    background: var(--surface-3);
+  }
+
+  .selects-wrap {
+    display: flex;
+    gap: 10px;
+  }
+
+  .pill-select {
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .pill-select:focus {
+    border-color: var(--accent);
+    background: var(--surface-3);
   }
 
   .chip-row {
@@ -227,19 +301,25 @@
     margin-bottom: 12px;
   }
 
+  .genres-row {
+    margin-bottom: 28px;
+  }
+
   .chip-divider {
     width: 1px;
     background: var(--border);
-    margin: 2px 8px;
+    margin: 2px 6px;
+    height: 24px;
+    align-self: center;
   }
 
   .sentinel {
-    height: 70px;
+    height: 80px;
   }
 
   .spinner.small {
-    margin: 22px auto;
-    width: 26px;
-    height: 26px;
+    margin: 24px auto;
+    width: 28px;
+    height: 28px;
   }
 </style>

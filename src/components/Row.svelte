@@ -12,7 +12,7 @@
 
   function scrollBy(dir: number) {
     if (!scroller) return;
-    scroller.scrollBy({ left: dir * scroller.clientWidth * 0.85, behavior: "smooth" });
+    scroller.scrollBy({ left: dir * scroller.clientWidth * 0.82, behavior: "smooth" });
   }
 </script>
 
@@ -24,10 +24,14 @@
         <a class="link" href={moreHref}>View all</a>
       {/if}
       <button class="arrow" onclick={() => scrollBy(-1)} aria-label="Scroll left">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="15 18 9 12 15 6" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
       </button>
       <button class="arrow" onclick={() => scrollBy(1)} aria-label="Scroll right">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><polyline points="9 18 15 12 9 6" /></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
       </button>
     </div>
   </div>
@@ -42,7 +46,7 @@
 
 <style>
   .row-section {
-    margin: 30px 0;
+    margin: 32px 0 38px;
   }
 
   .row-actions {
@@ -52,30 +56,39 @@
   }
 
   .link {
-    font-size: 12.5px;
-    margin-right: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+    margin-right: 12px;
+    transition: color 0.12s ease;
+  }
+
+  .link:hover {
+    color: var(--accent);
   }
 
   .arrow {
-    width: 30px;
-    height: 30px;
+    width: 34px;
+    height: 34px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: var(--surface);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
     color: var(--text-dim);
-    transition: all 0.12s ease;
+    transition: all 0.14s ease;
   }
 
   .arrow:hover {
-    background: var(--surface-2);
+    background: var(--surface-3);
     color: var(--text);
+    border-color: var(--text-faint);
   }
 
   .arrow svg {
-    width: 14px;
-    height: 14px;
+    width: 15px;
+    height: 15px;
   }
 
   .scroller {
@@ -84,14 +97,12 @@
     overflow-x: auto;
     scroll-behavior: smooth;
     padding-bottom: 8px;
-  }
-
-  .scroller::-webkit-scrollbar {
-    height: 8px;
+    scrollbar-width: thin;
   }
 
   .cell {
-    width: 250px;
-    min-width: 250px;
+    width: 190px;
+    min-width: 190px;
+    flex-shrink: 0;
   }
 </style>

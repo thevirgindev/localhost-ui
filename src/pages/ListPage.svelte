@@ -53,70 +53,99 @@
     paused: "Paused",
     dropped: "Dropped",
   };
-
-  let activeMenu: number | null = $state(null);
 </script>
 
 <div class="page">
   <h1 class="page-title">My List</h1>
-  <p class="page-sub">Your personal watchlist — stored on this machine only.</p>
+  <p class="page-sub">Your personal watchlist and progress — saved locally on this machine.</p>
 
   <div class="chip-row">
     {#each TABS as t}
-      <button class="chip" class:active={tab === t.value} onclick={() => setTab(t.value)}>{t.label}</button>
+      <button class="chip" class:active={tab === t.value} onclick={() => setTab(t.value)}>
+        {t.label}
+      </button>
     {/each}
   </div>
 
   {#if loading}
     <div class="spinner"></div>
   {:else if error}
-    <div class="error-box"><span>{error}</span><button class="btn" onclick={load}>Retry</button></div>
+    <div class="error-box">
+      <span>{error}</span>
+      <button class="btn secondary" onclick={load}>Retry</button>
+    </div>
   {:else if items.length === 0}
     <div class="empty-state">
       <div class="big">☆</div>
-      <p>Nothing here yet.</p>
-      <p class="hint">Open any anime and press “Add to list”.</p>
+      <p>Your watchlist is empty.</p>
+      <p class="hint">Browse titles and click “My List” to add anime here.</p>
     </div>
   {:else}
     <div class="list-rows">
       {#each items as item (item.animeId)}
         <div class="list-row">
-          <button class="thumb-btn" onclick={() => router.navigate({ name: "details", id: item.animeId })}>
+          <button
+            class="thumb-btn"
+            onclick={() => router.navigate({ name: "details", id: item.animeId })}
+            aria-label="View {item.title}"
+          >
             {#if item.cover}
-              <img class="thumb" src={item.cover} alt="" />
+              <img class="thumb" src={item.cover} alt={item.title} loading="lazy" />
             {:else}
-              <div class="thumb no-img">_</div>
+              <div class="thumb no-img">▶</div>
             {/if}
           </button>
-          <div class="row-main" onclick={() => router.navigate({ name: "details", id: item.animeId })}>
+
+          <button
+            class="row-main"
+            onclick={() => router.navigate({ name: "details", id: item.animeId })}
+          >
             <div class="row-title">{item.title}</div>
             <div class="row-sub">
               {#if item.episodesTotal}
-                <span>{item.episodesTotal} ep</span>
+                <span>{item.episodesTotal} {item.episodesTotal === 1 ? "episode" : "episodes"}</span>
               {/if}
               <span class="sep">·</span>
-              <span>{item.progress > 0 ? `EP ${item.progress} watched` : "not started"}</span>
+              <span>{item.progress > 0 ? `EP ${item.progress} watched` : "Not started"}</span>
               {#if item.status === "RELEASING"}
                 <span class="sep">·</span>
-                <span class="airing">airing</span>
+                <span class="airing">
+                  <span class="airing-dot"></span>
+                  <span>Airing</span>
+                </span>
               {/if}
             </div>
             <div class="progress-track">
-              <div class="progress-fill" style="width: {item.episodesTotal ? Math.min(100, (item.progress / item.episodesTotal) * 100) : item.progress > 0 ? 6 : 0}%"></div>
+              <div
+                class="progress-fill"
+                style="width: {item.episodesTotal ? Math.min(100, (item.progress / item.episodesTotal) * 100) : item.progress > 0 ? 8 : 0}%"
+              ></div>
             </div>
-          </div>
-          <select
-            class="status-select"
-            value={item.listStatus}
-            onchange={(e) => setStatus(item.animeId, (e.target as HTMLSelectElement).value)}
-          >
-            {#each Object.entries(statusLabel) as [value, label]}
-              <option value={value}>{label}</option>
-            {/each}
-          </select>
-          <button class="btn secondary remove-btn" onclick={() => remove(item.animeId)} title="Remove">
-            ✕
           </button>
+
+          <div class="row-actions">
+            <select
+              class="status-select"
+              value={item.listStatus}
+              onchange={(e) => setStatus(item.animeId, (e.target as HTMLSelectElement).value)}
+            >
+              {#each Object.entries(statusLabel) as [value, label]}
+                <option value={value}>{label}</option>
+              {/each}
+            </select>
+
+            <button
+              class="remove-btn"
+              onclick={() => remove(item.animeId)}
+              title="Remove from list"
+              aria-label="Remove from list"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
         </div>
       {/each}
     </div>
@@ -128,78 +157,103 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
 
   .list-rows {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    max-width: 980px;
+    gap: 12px;
+    max-width: 1040px;
   }
 
   .list-row {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     background: var(--surface);
-    border: 1px solid var(--border-soft);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 10px;
+    padding: 12px 16px;
+    transition: border-color 0.12s ease;
+  }
+
+  .list-row:hover {
+    border-color: var(--surface-3);
+  }
+
+  .thumb-btn {
+    flex-shrink: 0;
+    cursor: pointer;
   }
 
   .thumb {
-    width: 52px;
-    height: 72px;
-    border-radius: 6px;
+    width: 58px;
+    height: 84px;
+    border-radius: var(--radius-sm);
     object-fit: cover;
-    cursor: pointer;
     background: var(--surface-2);
-    flex-shrink: 0;
+    display: block;
   }
 
   .no-img {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-faint);
+    color: var(--accent);
+    font-size: 18px;
     font-weight: 800;
   }
 
   .row-main {
     flex: 1;
     min-width: 0;
+    text-align: left;
     cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
   }
 
   .row-title {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 3px;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+    transition: color 0.12s ease;
+  }
+
+  .row-main:hover .row-title {
+    color: var(--accent-hover);
   }
 
   .row-sub {
     display: flex;
+    align-items: center;
     gap: 8px;
-    font-size: 12px;
+    font-size: 12.5px;
     color: var(--text-dim);
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   .sep {
-    opacity: 0.5;
+    color: var(--text-faint);
   }
 
   .airing {
-    color: var(--green);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--accent);
     font-weight: 600;
   }
 
   .progress-track {
     height: 4px;
-    background: var(--surface-2);
+    background: var(--surface-3);
     border-radius: 2px;
     overflow: hidden;
+    max-width: 320px;
   }
 
   .progress-fill {
@@ -208,18 +262,35 @@
     border-radius: 2px;
   }
 
+  .row-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
   .status-select {
-    font-size: 12.5px;
-    padding: 7px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
   }
 
   .remove-btn {
-    padding: 7px 11px;
-    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    transition: all 0.12s ease;
   }
 
-  .thumb-btn {
-    flex-shrink: 0;
-    border-radius: 6px;
+  .remove-btn:hover {
+    color: #ff8585;
+    background: #331818;
   }
 </style>

@@ -127,7 +127,7 @@
         videoEl.currentTime = pos;
       }
     } catch {
-      // no saved progress — start from the beginning
+      // No saved progress — start from the beginning
     }
     if (!saveTimer) {
       saveTimer = setInterval(saveProgress, 10000);
@@ -171,36 +171,57 @@
 
 <div class="player-page">
   <div class="player-top">
-    <button class="btn ghost" onclick={() => router.navigate({ name: "details", id })}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><polyline points="15 18 9 12 15 6" /></svg>
-      Back
+    <button class="back-btn" onclick={() => router.navigate({ name: "details", id })}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16">
+        <polyline points="15 18 9 12 15 6" />
+      </svg>
+      <span>Back</span>
     </button>
+
     <div class="now-playing">
-      <div class="np-title">{card?.title ?? "…"}</div>
+      <div class="np-title">{card?.title ?? "Loading anime…"}</div>
       <div class="np-ep">Episode {episode}{episodes.length ? ` of ${episodes.length}` : ""}</div>
     </div>
+
     <div class="top-actions">
-      <button class="btn" disabled={episode <= 1} onclick={prevEp}>‹ Prev</button>
-      <button class="btn" disabled={!hasNext} onclick={nextEp}>Next ›</button>
+      <button class="nav-ep-btn" disabled={episode <= 1} onclick={prevEp} title="Previous episode">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        <span>Prev</span>
+      </button>
+      <button class="nav-ep-btn" disabled={!hasNext} onclick={nextEp} title="Next episode">
+        <span>Next</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14">
+          <polyline points="9 18 15 12 9 6" />
+        </svg>
+      </button>
     </div>
   </div>
 
   {#if loading}
-    <div class="spinner"></div>
+    <div class="player-loading">
+      <div class="spinner"></div>
+    </div>
   {:else if error}
-    <div class="error-box">
-      <span>{error}</span>
-      <button class="btn" onclick={() => router.navigate({ name: "details", id })}>Back to details</button>
+    <div class="player-error">
+      <div class="error-box">
+        <span>{error}</span>
+        <button class="btn primary" onclick={() => router.navigate({ name: "details", id })}>
+          Back to Details
+        </button>
+      </div>
     </div>
   {:else if isEmbed}
     <div class="frame-wrap">
       <iframe
         src={streamUrl}
+        title="Anime Stream Embed"
         allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
         allowfullscreen
       ></iframe>
     </div>
-    <p class="embed-note">Playing via the official streaming embed. Player controls come from the provider.</p>
+    <p class="embed-note">Playing via stream embed. Controls provided by source player.</p>
   {:else}
     <div class="video-wrap">
       <video
@@ -215,10 +236,12 @@
   {/if}
 
   {#if !loading && !error && episodes.length > 0}
-    <section class="ep-strip">
+    <section class="ep-strip-wrap">
       <div class="strip-head">
-        <h3>Episodes</h3>
-        {#if source === "local"}<span class="src-note">from your library</span>{/if}
+        <h3>All Episodes</h3>
+        {#if source === "local"}
+          <span class="src-note">Playing from your local library</span>
+        {/if}
       </div>
       <div class="strip">
         {#each episodes as ep (ep.number)}
@@ -244,15 +267,36 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
-    background: #06070a;
+    background: #000000;
   }
 
   .player-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 20px;
-    gap: 16px;
+    padding: 12px 28px;
+    gap: 20px;
+    background: #0d0d0d;
+    border-bottom: 1px solid var(--border);
+    height: 56px;
+  }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dim);
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    transition: all 0.14s ease;
+  }
+
+  .back-btn:hover {
+    color: var(--text);
+    background: var(--surface-3);
   }
 
   .now-playing {
@@ -267,11 +311,13 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    color: var(--text);
   }
 
   .np-ep {
     font-size: 12px;
     color: var(--text-dim);
+    margin-top: 1px;
   }
 
   .top-actions {
@@ -279,10 +325,43 @@
     gap: 8px;
   }
 
+  .nav-ep-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: var(--surface-2);
+    color: var(--text);
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.13s ease;
+  }
+
+  .nav-ep-btn:hover:not(:disabled) {
+    background: var(--surface-3);
+    color: var(--accent);
+  }
+
+  .nav-ep-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .player-loading,
+  .player-error {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+
   .frame-wrap {
     flex: 1;
     min-height: 0;
     position: relative;
+    background: #000;
   }
 
   .frame-wrap iframe {
@@ -297,8 +376,9 @@
     text-align: center;
     color: var(--text-faint);
     font-size: 12px;
-    padding: 8px 0 14px;
+    padding: 8px 0 10px;
     margin: 0;
+    background: #0d0d0d;
   }
 
   .video-wrap {
@@ -313,13 +393,15 @@
   video {
     width: 100%;
     height: 100%;
-    max-height: 76vh;
+    max-height: 78vh;
     background: #000;
     outline: none;
   }
 
-  .ep-strip {
-    padding: 4px 20px 24px;
+  .ep-strip-wrap {
+    padding: 14px 28px 20px;
+    background: #0d0d0d;
+    border-top: 1px solid var(--border);
   }
 
   .strip-head {
@@ -330,25 +412,36 @@
   }
 
   .strip-head h3 {
-    font-size: 15px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .src-note {
+    font-size: 12px;
+    color: var(--text-faint);
   }
 
   .strip {
     display: flex;
     gap: 8px;
-    flex-wrap: wrap;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    scrollbar-width: thin;
   }
 
   .strip-item {
     min-width: 44px;
-    height: 34px;
-    padding: 0 10px;
-    border-radius: 6px;
-    background: var(--surface);
-    border: 1px solid var(--border-soft);
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
     font-size: 13px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-dim);
+    transition: all 0.12s ease;
+    flex-shrink: 0;
   }
 
   .strip-item:hover {
@@ -358,12 +451,7 @@
 
   .strip-item.current {
     background: var(--accent);
-    color: #14100c;
+    color: #0d0d0d;
     border-color: var(--accent);
-  }
-
-  .src-note {
-    font-size: 12px;
-    color: var(--text-faint);
   }
 </style>

@@ -28,10 +28,10 @@
 </script>
 
 <aside class="sidebar">
-  <div class="logo" onclick={() => go("home")} role="button" tabindex="0">
+  <button class="logo" onclick={() => go("home")}>
     <span class="logo-mark">_</span>
     <span class="logo-text">localhost</span>
-  </div>
+  </button>
 
   <nav>
     {#each navItems as item}

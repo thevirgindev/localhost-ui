@@ -50,29 +50,36 @@
   <div class="head">
     <div>
       <h1 class="page-title">Library</h1>
-      <p class="page-sub">Point localhost at your local anime folders. Files never leave your machine.</p>
+      <p class="page-sub">Point localhost at your local anime directories. Files never leave this machine.</p>
     </div>
     <button class="btn primary" onclick={pickFolder} disabled={busy}>
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
-      Add folder
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="16" height="16">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+      </svg>
+      Add Folder
     </button>
   </div>
 
   {#if loading}
     <div class="spinner"></div>
   {:else if error}
-    <div class="error-box"><span>{error}</span><button class="btn" onclick={load}>Retry</button></div>
+    <div class="error-box">
+      <span>{error}</span>
+      <button class="btn secondary" onclick={load}>Retry</button>
+    </div>
   {:else}
     {#if folders.length > 0}
-      <section>
-        <div class="section-head">
-          <h3>Watched folders</h3>
+      <section class="lib-section">
+        <div class="section-title">
+          <h3>Watched Folders</h3>
           <button class="link" onclick={load}>Rescan</button>
         </div>
         <div class="folder-list">
           {#each folders as f (f)}
             <div class="folder-row">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="f-icon"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="f-icon">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
               <span class="f-path" title={f}>{f}</span>
               <button class="btn danger" onclick={() => removeFolder(f)}>Remove</button>
             </div>
@@ -82,9 +89,9 @@
     {/if}
 
     {#if items.length > 0}
-      <section>
-        <div class="section-head">
-          <h3>Shows found ({items.length})</h3>
+      <section class="lib-section">
+        <div class="section-title">
+          <h3>Local Shows ({items.length})</h3>
         </div>
         <div class="show-grid">
           {#each items as item (item.title)}
@@ -93,7 +100,7 @@
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
               </div>
               <div class="show-title" title={item.title}>{item.title}</div>
-              <div class="show-count">{item.episodeCount} episode{item.episodeCount === 1 ? "" : "s"}</div>
+              <div class="show-count">{item.episodeCount} {item.episodeCount === 1 ? "episode" : "episodes"}</div>
             </a>
           {/each}
         </div>
@@ -101,14 +108,14 @@
     {:else if folders.length > 0}
       <div class="empty-state">
         <div class="big">📁</div>
-        <p>No video files found in those folders yet.</p>
-        <p class="hint">Each subfolder counts as one show; video files inside become episodes.</p>
+        <p>No video files found in those directories yet.</p>
+        <p class="hint">Each subfolder counts as one series; video files inside become episodes.</p>
       </div>
     {:else}
       <div class="empty-state">
         <div class="big">📁</div>
-        <p>No folders added.</p>
-        <p class="hint">Local shows take priority over streaming sources when titles match.</p>
+        <p>No local folders added.</p>
+        <p class="hint">Local files take precedence over online streams when titles match.</p>
       </div>
     {/if}
   {/if}
@@ -120,72 +127,79 @@
     align-items: flex-start;
     justify-content: space-between;
     gap: 16px;
+    margin-bottom: 8px;
+  }
+
+  .lib-section {
+    margin-bottom: 34px;
   }
 
   .folder-list {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-width: 860px;
+    max-width: 920px;
   }
 
   .folder-row {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     background: var(--surface);
-    border: 1px solid var(--border-soft);
+    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 10px 14px;
+    padding: 12px 18px;
   }
 
   .f-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     color: var(--accent);
     flex-shrink: 0;
   }
 
   .f-path {
     flex: 1;
-    font-size: 13px;
+    font-size: 13.5px;
     color: var(--text-dim);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     direction: rtl;
     text-align: left;
+    font-family: var(--mono);
   }
 
   .show-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 14px;
   }
 
   .show-card {
     background: var(--surface);
-    border: 1px solid var(--border-soft);
+    border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 18px 16px;
+    padding: 20px 18px;
     color: var(--text);
-    transition: border-color 0.12s ease;
+    transition: all 0.14s ease;
   }
 
   .show-card:hover {
     border-color: var(--accent);
+    background: var(--surface-2);
   }
 
   .show-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 9px;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     background: var(--accent-dim);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--accent);
-    margin-bottom: 12px;
+    margin-bottom: 14px;
   }
 
   .show-icon svg {
@@ -194,9 +208,9 @@
   }
 
   .show-title {
-    font-weight: 600;
-    font-size: 13.5px;
-    margin-bottom: 3px;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

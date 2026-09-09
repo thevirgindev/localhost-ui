@@ -45,129 +45,198 @@
   });
 </script>
 
-<div class="page home">
+<div class="home-view">
   {#if loading}
     <div class="spinner"></div>
   {:else if error}
-    <div class="error-box">
-      <span>Couldn't load the catalog: {error}</span>
-      <button class="btn secondary" onclick={() => location.reload()}>Retry</button>
+    <div class="page">
+      <div class="error-box">
+        <span>Couldn't load the catalog: {error}</span>
+        <button class="btn secondary" onclick={() => location.reload()}>Retry</button>
+      </div>
     </div>
   {:else}
     <Hero cards={heroCards} />
 
-    {#if continueItems.length > 0}
-      <section>
-        <div class="section-title">
-          <h3>Continue Watching</h3>
-        </div>
-        <div class="cw-grid">
-          {#each continueItems.slice(0, 10) as item (item.animeId)}
-            {@const lastEp = progressMap.get(item.animeId) ?? item.progress}
-            <button
-              class="cw-card"
-              onclick={() => router.navigate({ name: "watch", id: item.animeId, episode: Math.max(1, lastEp) })}
-            >
-              {#if item.cover}
-                <img src={item.cover} alt="" />
-              {:else}
-                <div class="cw-noimg">▶</div>
-              {/if}
-              <div class="cw-info">
-                <div class="cw-title">{item.title}</div>
-                <div class="cw-ep">
-                  {lastEp >= (item.episodesTotal ?? Infinity) ? "Finished" : `Episode ${Math.max(1, lastEp)}`}
+    <div class="page home-content">
+      {#if continueItems.length > 0}
+        <section class="cw-section">
+          <div class="section-title">
+            <h3>Continue Watching</h3>
+          </div>
+          <div class="cw-grid">
+            {#each continueItems.slice(0, 8) as item (item.animeId)}
+              {@const lastEp = progressMap.get(item.animeId) ?? item.progress}
+              {@const percent = item.episodesTotal ? Math.min(100, Math.max(8, (lastEp / item.episodesTotal) * 100)) : 50}
+              <button
+                class="cw-card"
+                onclick={() => router.navigate({ name: "watch", id: item.animeId, episode: Math.max(1, lastEp) })}
+              >
+                <div class="cw-thumb">
+                  {#if item.cover}
+                    <img src={item.cover} alt="" loading="lazy" />
+                  {:else}
+                    <div class="cw-noimg">▶</div>
+                  {/if}
+                  <div class="cw-hover-overlay">
+                    <span class="cw-play-circle">
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </span>
+                  </div>
+                  <div class="cw-progress-bar">
+                    <div class="cw-progress-fill" style="width: {percent}%"></div>
+                  </div>
                 </div>
-              </div>
-              <svg class="cw-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-            </button>
-          {/each}
-        </div>
-      </section>
-    {/if}
+                <div class="cw-info">
+                  <div class="cw-ep-tag">
+                    {lastEp >= (item.episodesTotal ?? Infinity) ? "COMPLETED" : `EPISODE ${Math.max(1, lastEp)}`}
+                  </div>
+                  <div class="cw-title" title={item.title}>{item.title}</div>
+                </div>
+              </button>
+            {/each}
+          </div>
+        </section>
+      {/if}
 
-    {#if trending.length}
-      <Row title="Trending Now" cards={trending} />
-    {/if}
+      {#if trending.length}
+        <Row title="Trending Now" cards={trending} />
+      {/if}
 
-    {#if seasonal.length}
-      <Row title="Simulcast Season" cards={seasonal} moreHref="#/season" />
-    {/if}
+      {#if seasonal.length}
+        <Row title="Simulcast Season" cards={seasonal} moreHref="#/season" />
+      {/if}
 
-    {#if popular.length}
-      <Row title="Popular" cards={popular} moreHref="#/browse" />
-    {/if}
+      {#if popular.length}
+        <Row title="Most Popular" cards={popular} moreHref="#/browse" />
+      {/if}
+    </div>
   {/if}
 </div>
 
 <style>
-  .home {
+  .home-view {
+    padding-bottom: 50px;
+  }
+
+  .home-content {
     padding-top: 0;
+  }
+
+  .cw-section {
+    margin: 10px 0 32px;
   }
 
   .cw-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
   }
 
   .cw-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 8px 14px 8px 8px;
+    display: block;
     text-align: left;
-    transition: background 0.12s ease;
+    width: 100%;
+    cursor: pointer;
   }
 
-  .cw-card:hover {
+  .cw-thumb {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
     background: var(--surface-2);
+    transition: transform 0.16s ease, box-shadow 0.16s ease;
   }
 
-  .cw-card img,
-  .cw-noimg {
-    width: 84px;
-    height: 48px;
+  .cw-card:hover .cw-thumb {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
+  }
+
+  .cw-thumb img {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 6px;
-    background: var(--surface-2);
-    flex-shrink: 0;
+  }
+
+  .cw-noimg {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--accent);
-    font-weight: 800;
+    font-size: 24px;
+    background: var(--surface-2);
+  }
+
+  .cw-hover-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(13, 13, 13, 0.4);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .cw-card:hover .cw-hover-overlay {
+    opacity: 1;
+  }
+
+  .cw-play-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #0d0d0d;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  }
+
+  .cw-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: rgba(0, 0, 0, 0.6);
+  }
+
+  .cw-progress-fill {
+    height: 100%;
+    background: var(--accent);
   }
 
   .cw-info {
-    flex: 1;
-    min-width: 0;
+    padding: 10px 2px 0;
+  }
+
+  .cw-ep-tag {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    margin-bottom: 3px;
   }
 
   .cw-title {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 700;
+    color: var(--text);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: color 0.12s ease;
   }
 
-  .cw-ep {
-    font-size: 11.5px;
-    color: var(--text-faint);
-    margin-top: 3px;
-  }
-
-  .cw-play {
-    width: 22px;
-    height: 22px;
-    color: var(--text-faint);
-    flex-shrink: 0;
-  }
-
-  .cw-card:hover .cw-play {
-    color: var(--accent);
+  .cw-card:hover .cw-title {
+    color: var(--accent-hover);
   }
 </style>

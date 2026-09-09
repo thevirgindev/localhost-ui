@@ -4,10 +4,8 @@ import { invoke } from "./ipc";
 import type {
   AnimeCard,
   BrowsePage,
-  EpisodeEntry,
   LocalEpisode,
   LocalItem,
-  PlayableEpisode,
   ProgressEntry,
   SeasonInfo,
   SourcesResult,
