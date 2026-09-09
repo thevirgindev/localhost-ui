@@ -20,7 +20,7 @@ export const tauriAvailable = isTauri;
 // Fire-and-forget local error capture — written to a local log file only.
 export function reportError(where: string, err: unknown) {
   if (!isTauri) {
-    console.debug(`[localhost error: ${where}]`, err);
+    console.debug(`[Luci error: ${where}]`, err);
     return;
   }
   const message = `${where}: ${err instanceof Error ? (err.stack ?? err.message) : String(err)}`;
@@ -31,7 +31,7 @@ export function reportError(where: string, err: unknown) {
 
 function getStored<T>(key: string, fallback: T): T {
   try {
-    const val = localStorage.getItem(`localhost_${key}`);
+    const val = localStorage.getItem(`luci_${key}`);
     return val ? JSON.parse(val) : fallback;
   } catch {
     return fallback;
@@ -40,7 +40,7 @@ function getStored<T>(key: string, fallback: T): T {
 
 function setStored<T>(key: string, val: T): void {
   try {
-    localStorage.setItem(`localhost_${key}`, JSON.stringify(val));
+    localStorage.setItem(`luci_${key}`, JSON.stringify(val));
   } catch {
     // Ignore storage quota
   }

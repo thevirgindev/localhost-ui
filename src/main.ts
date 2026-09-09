@@ -10,14 +10,14 @@ window.addEventListener("unhandledrejection", (e) => reportError("unhandledrejec
 (async () => {
   try {
     const { getCurrentWindow } = await import("@tauri-apps/api/window");
-    await getCurrentWindow().setTitle("localhost: js-running");
+    await getCurrentWindow().setTitle("Luci: js-running");
     const { invoke } = await import("@tauri-apps/api/core");
     await invoke("log_frontend_error", { message: "boot-ping" });
-    await getCurrentWindow().setTitle("localhost: ipc-ok");
+    await getCurrentWindow().setTitle("Luci: ipc-ok");
   } catch (e) {
     try {
       const { getCurrentWindow } = await import("@tauri-apps/api/window");
-      await getCurrentWindow().setTitle(`localhost: fail ${String(e).slice(0, 80)}`);
+      await getCurrentWindow().setTitle(`Luci: fail ${String(e).slice(0, 80)}`);
     } catch {
       // window API unavailable — leave title as-is
     }

@@ -30,7 +30,7 @@
 <aside class="sidebar">
   <button class="logo" onclick={() => go("home")}>
     <span class="logo-mark">_</span>
-    <span class="logo-text">localhost</span>
+    <span class="logo-text">Luci</span>
   </button>
 
   <nav>
