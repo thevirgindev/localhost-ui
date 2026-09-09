@@ -33,6 +33,7 @@ pub fn run() {
             catalog::current_season_info,
             catalog::season_now,
             catalog::anime_characters,
+            catalog::clear_api_cache,
             commands::add_to_watchlist,
             commands::remove_from_watchlist,
             commands::set_list_status,

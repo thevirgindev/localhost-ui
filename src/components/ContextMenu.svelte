@@ -531,7 +531,7 @@
     background: #14151a;
     border: 1px solid #282a33;
     border-radius: 8px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.92), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.92);
     padding: 6px;
     display: flex;
     flex-direction: column;

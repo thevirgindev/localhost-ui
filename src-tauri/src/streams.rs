@@ -187,7 +187,7 @@ pub async fn resolve_episode_list(
     cache: &crate::providers::ResponseCache,
     mal_id: i64,
     title: &str,
-    title_english: Option<&str>,
+    _title_english: Option<&str>,
 ) -> Result<SourcesResult, String> {
     // 1) Local library — offline first.
     let local = crate::library::local_episodes_internal(db, title).await.unwrap_or_default();
@@ -228,22 +228,8 @@ pub async fn resolve_episode_list(
         return Err("episode metadata unavailable from every provider".into());
     }
 
-    // Probe server availability once per list (sample episode 1).
-    let (direct1, embed1) = anizip_sources(cache, mal_id, 1).await.unwrap_or_default();
-    let anizip_alive = !direct1.is_empty() || !embed1.is_empty();
-    let mirrors = mirror_base_urls(db).await;
-    let mut mirror_ok: Option<String> = None;
-    for m in &mirrors {
-        if mirror_sources(cache, m, title_english.unwrap_or(title), 1)
-            .await
-            .map(|urls| !urls.is_empty())
-            .unwrap_or(false)
-        {
-            mirror_ok = Some(m.clone());
-            break;
-        }
-    }
-
+    // Availability is resolved lazily per episode at play time — probing
+    // every episode's sources up-front would take minutes.
     let mut episodes: Vec<EpisodeEntry> = Vec::with_capacity(count as usize);
     for n in 1..=count {
         // Metadata: ani.zip per-episode title when present.
@@ -265,27 +251,16 @@ pub async fn resolve_episode_list(
             })
             .unwrap_or_else(|| (format!("Episode {n}"), None));
 
-        // URL for this episode: ani.zip ep1-style sources were only sampled
-        // for episode 1; per-episode probing of every list entry is too slow,
-        // so direct URLs are resolved on-demand by resolve_playable instead.
-        // The list carries an empty URL when the source is not yet known and
-        // the frontend triggers lazy resolution on play.
-        let url = if n == 1 {
-            direct1.first().cloned().or_else(|| embed1.first().cloned()).unwrap_or_default()
-        } else if anizip_alive || mirror_ok.is_some() {
-            String::new() // resolved lazily on play
-        } else {
-            String::new()
-        };
-
-        episodes.push(EpisodeEntry { number: n, title: ep_title, url, aired, filler: false, recap: false });
+        // url stays empty here on purpose: `resolve_playable` probes the full
+        // server chain on demand when the user hits play.
+        episodes.push(EpisodeEntry { number: n, title: ep_title, url: String::new(), aired, filler: false, recap: false });
     }
 
     Ok(SourcesResult {
         mal_id,
         anime_title: title.to_string(),
         episodes,
-        source: "anizip+chain".into(),
+        source: "luci-chain".into(),
     })
 }
 

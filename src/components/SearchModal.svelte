@@ -332,7 +332,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.95);
     animation: modalScalePop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   }
 

@@ -1170,7 +1170,7 @@
     height: 14px;
     border-radius: 50%;
     background: #ffffff;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+    
     transition: transform 0.15s ease;
   }
 
@@ -1578,7 +1578,7 @@
     height: 7px;
     border-radius: 50%;
     background: var(--green, #10b981);
-    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+    
   }
 
   .embed-stage {

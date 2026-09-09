@@ -249,7 +249,8 @@
 
   function clearLocalCache() {
     localStorage.removeItem("luci_anime_cache");
-    showNotice("Local anime cache flushed and refreshed.");
+    api.clearApiCache().catch(() => {});
+    showNotice("API + local cache flushed.");
   }
 </script>
 
@@ -992,9 +993,21 @@
             <div class="providers-block">
               <div class="providers-head-row">
                 <h3 class="providers-subtitle">API Health</h3>
-                <button class="btn secondary sm" onclick={runHealthCheck} disabled={healthLoading}>
-                  {healthLoading ? "Checking…" : "Re-run Check"}
-                </button>
+                <div class="providers-head-actions">
+                  <button class="btn secondary sm" onclick={runHealthCheck} disabled={healthLoading}>
+                    {healthLoading ? "Checking…" : "Re-run Check"}
+                  </button>
+                  <button
+                    class="btn secondary sm"
+                    onclick={async () => {
+                      await api.clearApiCache().catch(() => {});
+                      showNotice("API cache cleared.");
+                      runHealthCheck();
+                    }}
+                  >
+                    Clear API Cache
+                  </button>
+                </div>
               </div>
 
               {#if health.length === 0 && !healthLoading}
@@ -1426,7 +1439,7 @@
   .preset-card.active {
     background: var(--surface-3, #222634);
     border-color: var(--accent, var(--accent));
-    box-shadow: 0 0 0 1px var(--accent, var(--accent));
+    
   }
 
   .custom-preset-card {
@@ -1523,7 +1536,7 @@
   .radio-card.active {
     background: var(--surface-3, #222530);
     border-color: var(--accent, var(--accent));
-    box-shadow: 0 0 0 1px var(--accent, var(--accent));
+    
   }
 
   .theme-preview-box {
@@ -1628,7 +1641,7 @@
   .color-btn.active {
     background: var(--surface-3, #22242e);
     border-color: var(--accent, var(--accent));
-    box-shadow: 0 0 0 1px var(--accent, var(--accent));
+    
   }
 
   .color-swatch {
@@ -1710,7 +1723,7 @@
   .radius-option-card.active {
     background: var(--surface-3, #22242e);
     border-color: var(--accent, var(--accent));
-    box-shadow: 0 0 0 1px var(--accent, var(--accent));
+    
   }
 
   .radius-sample-box {
@@ -1758,7 +1771,7 @@
   .font-option-card.active {
     background: var(--surface-3, #22242e);
     border-color: var(--accent, var(--accent));
-    box-shadow: 0 0 0 1px var(--accent, var(--accent));
+    
   }
 
   .font-sample {
@@ -1808,7 +1821,7 @@
   .card-opt-btn.active {
     background: var(--surface-3, #22242e);
     border-color: var(--accent, var(--accent));
-    box-shadow: 0 0 0 1px var(--accent, var(--accent));
+    
   }
 
   .card-opt-title {
@@ -2286,7 +2299,7 @@
   .quality-card.active {
     background: var(--surface-3, #22242e);
     border-color: var(--accent, var(--accent));
-    box-shadow: 0 0 0 1px var(--accent, var(--accent));
+    
   }
 
   .q-title {
@@ -2393,6 +2406,11 @@
     margin-bottom: 12px;
   }
 
+  .providers-head-actions {
+    display: flex;
+    gap: 8px;
+  }
+
   .providers-subtitle {
     font-size: 14px;
     font-weight: 800;
@@ -2438,12 +2456,12 @@
 
   .health-dot.ok {
     background: var(--green, #10b981);
-    box-shadow: 0 0 6px rgba(16, 185, 129, 0.5);
+    
   }
 
   .health-dot.down {
     background: #ef4444;
-    box-shadow: 0 0 6px rgba(239, 68, 68, 0.4);
+    
   }
 
   .health-name {

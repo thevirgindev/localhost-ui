@@ -55,6 +55,7 @@ export const api = {
 
   // providers (LuciAPI)
   providerHealth: () => invoke<ProviderHealth[]>("provider_health"),
+  clearApiCache: () => invoke<void>("clear_api_cache"),
   streamMirrors: () => invoke<string[]>("get_stream_mirrors"),
   setStreamMirrors: (mirrors: string[]) => invoke<void>("set_stream_mirrors", { mirrors }),
 

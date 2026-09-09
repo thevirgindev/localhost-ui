@@ -1,7 +1,7 @@
 use crate::types::AnimeCard;
 use std::time::Duration;
 
-const KITSU: &str = "https://kitsu.io/api/edge";
+const KITSU: &str = "https://kitsu.app/api/edge";
 
 /// Kitsu-sourced ids are offset into their own space so they never collide
 /// with MAL ids used by the Jikan provider.

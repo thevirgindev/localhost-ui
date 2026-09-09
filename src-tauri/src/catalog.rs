@@ -570,6 +570,13 @@ fn capitalize(s: &str) -> String {
     }
 }
 
+/// Drop every cached API response (Settings → Providers).
+#[tauri::command]
+pub async fn clear_api_cache(cache: State<'_, LuciCache>) -> Result<(), String> {
+    cache.clear().await;
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn season_now(cache: State<'_, LuciCache>) -> Result<Vec<AnimeCard>, String> {
     let jikan = jikan_get(&cache, "jikan:season-now", "/seasons/now?limit=24", Duration::from_secs(900)).await;

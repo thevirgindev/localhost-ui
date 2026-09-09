@@ -148,12 +148,13 @@
                 border-color 0.2s ease;
   }
 
-  /* Sleek, refined hover highlight - NO tacky orange glow */
+  /* Highlight redesign: crisp accent border + soft depth shadow.
+     No glow, no color bleed — monochrome, flat, clean. */
   .card:hover .thumb,
   .card:focus-visible .thumb {
-    transform: translateY(-4px);
-    border-color: rgba(255, 255, 255, 0.35);
-    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.55);
+    transform: translateY(-3px);
+    border-color: var(--accent);
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
   }
 
   .thumb img {
@@ -232,9 +233,9 @@
   }
 
   .quick-bookmark:hover {
-    background: #c084fc;
-    color: #0d0d0d;
-    transform: scale(1.1) !important;
+    background: var(--surface-2);
+    color: var(--text);
+    transform: scale(1.08) !important;
   }
 
   .score-badge {
@@ -255,7 +256,7 @@
   }
 
   .card:hover .score-badge {
-    opacity: 0;
+    opacity: 1;
   }
 
   .hover-shade {
@@ -264,11 +265,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: radial-gradient(circle at center, rgba(13, 13, 13, 0.25) 0%, rgba(13, 13, 13, 0.75) 100%);
-    backdrop-filter: blur(1.5px);
-    -webkit-backdrop-filter: blur(1.5px);
+    background: rgba(10, 10, 12, 0.55);
     opacity: 0;
-    transition: opacity 0.18s ease;
+    transition: opacity 0.15s ease;
     z-index: 2;
   }
 
@@ -287,11 +286,11 @@
     font-weight: 800;
     padding: 8px 18px;
     border-radius: 999px;
-    transform: scale(0.88) translateY(6px);
+    transform: scale(0.94);
     opacity: 0;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.65), 0 0 14px color-mix(in srgb, var(--accent) 45%, transparent);
-    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
-                opacity 0.18s ease,
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+    transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.15s ease,
                 background 0.12s ease;
   }
 
@@ -322,7 +321,7 @@
 
   .card:hover .title,
   .card:focus-visible .title {
-    color: var(--accent);
+    color: #ffffff;
   }
 
   .sub {
@@ -342,23 +341,6 @@
     background: var(--accent);
     display: inline-block;
     flex-shrink: 0;
-    box-shadow: 0 0 8px var(--accent);
-    animation: pulse 1.8s infinite;
-  }
-
-  @keyframes pulse {
-    0% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent);
-    }
-    70% {
-      transform: scale(1.05);
-      box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 0%, transparent);
-    }
-    100% {
-      transform: scale(0.95);
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 0%, transparent);
-    }
   }
 
   .airing-text {

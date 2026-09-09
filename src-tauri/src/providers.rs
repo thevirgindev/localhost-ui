@@ -15,7 +15,7 @@ use std::collections::HashMap;
 use std::time::{Duration, Instant};
 
 pub const JIKAN: &str = "https://api.jikan.moe/v4";
-pub const KITSU: &str = "https://kitsu.io/api/edge";
+pub const KITSU: &str = "https://kitsu.app/api/edge";
 pub const SHIKI: &str = "https://shikimori.one/api";
 pub const ANIZIP: &str = "https://api.ani.zip/mappings";
 pub const ANILIST: &str = "https://graphql.anilist.co";
@@ -59,6 +59,11 @@ impl ResponseCache {
         None
     }
 
+    /// Drop every cached response (Settings → Providers → Clear API Cache).
+    pub async fn clear(&self) {
+        self.inner.lock().await.clear();
+    }
+
     pub async fn put(&self, key: String, json: serde_json::Value, ttl: Duration) {
         let mut map = self.inner.lock().await;
         if map.len() > 512 {
@@ -90,7 +95,17 @@ pub async fn http_json(url: &str, method: &str, body: Option<String>) -> Result<
                 .body(body.clone().unwrap_or_default()),
             _ => client.get(url),
         };
-        let resp = req.send().await.map_err(|e| format!("network: {e}"))?;
+        // Hard per-attempt deadline so a slow provider never stalls the
+        // fallback chain — a hung API must fail over, quickly.
+        let resp = match tokio::time::timeout(Duration::from_secs(8), req.send()).await {
+            Ok(r) => r.map_err(|e| format!("network: {e}"))?,
+            Err(_) => {
+                if attempt < 2 {
+                    continue;
+                }
+                return Err("timeout".into());
+            }
+        };
         let status = resp.status();
         if (status.as_u16() == 429 || status.as_u16() >= 500) && attempt < 2 {
             tokio::time::sleep(backoff).await;
